@@ -1,0 +1,45 @@
+{
+  "loyaltyCard": "LOYALTY CARD",
+  "registrationForm": "Registration Form",
+  "gender": "Gender",
+  "female": "Female",
+  "male": "Male",
+  "other": "Other",
+
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "birthDate": "Birth Date",
+  "address": "Address",
+  "zipCode": "ZIP Code",
+  "city": "City",
+  "country": "Country",
+
+  "cardNumber": "Card Number",
+  "email": "Email",
+  "mobile": "Mobile",
+  "verificationCode": "Verification Code",
+
+  "receiveNews": "I wish to receive Kiabi news",
+  "bySms": "By SMS",
+  "byEmail": "By Email",
+  "yes": "Yes",
+  "no": "No",
+
+  "termsAgreeText": "I read and agree to",
+  "termsAndConditions": "terms and conditions",
+
+  "clear": "Clear",
+  "submit": "Submit",
+  "sending": "Sending...",
+  "successTitle": "Submission Successful",
+  "successMessage": "Your data has been successfully submitted.",
+  "ok": "OK",
+
+  "requiredFieldsError": "Please fill in the required fields.",
+  "codeSent": "Code sent",
+  "codeInvalid": "Invalid code",
+  "codeValid": "Code verified",
+  "resendIn": "Resend in",
+  "getCode": "Code",
+  "verify": "Verify"
+}

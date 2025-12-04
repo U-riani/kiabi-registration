@@ -1,0 +1,46 @@
+{
+  "loyaltyCard": "ლოიალურობის ბარათი",
+  "registrationForm": "სარეგისტრაციო ფორმა",
+
+  "gender": "სქესი",
+  "female": "ქალი",
+  "male": "კაცი",
+  "other": "სხვა",
+
+  "firstName": "სახელი",
+  "lastName": "გვარი",
+  "birthDate": "დაბადების თარიღი",
+  "address": "მისამართი",
+  "zipCode": "ინდექსი(zip code)",
+  "city": "ქალაქი",
+  "country": "ქვეყანა",
+
+  "cardNumber": "ბარათის ნომერი",
+  "email": "ელ-ფოსტა",
+  "mobile": "მობილური",
+  "verificationCode": "ვერიფიკაციის კოდი",
+
+  "receiveNews": "მსურს მივიღო Kiabi-ის სიახლეები",
+  "bySms": "SMS-ის საშუალებით",
+  "byEmail": "ელ-ფოსტით",
+  "yes": "დიახ",
+  "no": "არა",
+
+  "termsAgreeText": "გავეცანი და ვეთანხმები",
+  "termsAndConditions": "წესებსა და პირობებს",
+
+  "clear": "გასუფთავება",
+  "submit": "გაგზავნა",
+  "sending": "იგზავნება...",
+  "successTitle": "გაგზავნა წარმატებულია",
+  "successMessage": "თქვენი მონაცემები წარმატებით გაიგზავნა.",
+  "ok": "კარგი",
+
+  "requiredFieldsError": "გთხოვთ შეავსოთ სავალდებულო ველები.",
+  "codeSent": "კოდი გაიგზავნა",
+  "codeInvalid": "კოდი არასწორია",
+  "codeValid": "კოდი დადასტურდა",
+  "resendIn": "გამეორება",
+  "getCode": "კოდი",
+  "verify": "დადასტურება"
+}

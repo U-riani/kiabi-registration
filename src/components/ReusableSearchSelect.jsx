@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 
-const ReusableSearchSelect = ({ options = [], value = "", onChange }) => {
+const ReusableSearchSelect = ({
+  options = [],
+  value = "",
+  onChange,
+  forElement,
+}) => {
   const dropdownRef = useRef(null);
   const [query, setQuery] = useState(value || "");
   const [open, setOpen] = useState(false);
@@ -56,8 +61,10 @@ const ReusableSearchSelect = ({ options = [], value = "", onChange }) => {
   return (
     <div className="relative w-full" ref={dropdownRef}>
       <input
+        id={forElement}
+        name={forElement}
         type="text"
-        className="border px-3 py-2 rounded w-full cursor-pointer"
+        className="border px-3 py-2 rounded border-gray-400 w-full cursor-pointer "
         placeholder="Select..."
         value={query}
         onChange={(e) => handleInputChange(e.target.value)}
