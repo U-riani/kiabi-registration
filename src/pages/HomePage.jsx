@@ -1,319 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import RegionCitySelect from "../components/RegionCitySelect ";
 import ReusableSearchSelect from "../components/ReusableSearchSelect";
 import { useTranslation } from "react-i18next";
 import LanguageButton from "../components/LanguageButton";
+import { regions } from "../data/regions";
+import { countries } from "../data/countries";
+import { phonePrefixes } from "../data/phoneNumberPrefixes";
 
 const HomePage = () => {
-  const regions = [
-    "Abastumani",
-    "Abasha",
-    "Agara",
-    "Adigeni",
-    "Ambrolauri",
-    "Anaklia",
-    "Aspindza",
-    "Akhaldaba",
-    "Akhalkalaki",
-    "Akhaltsikhe",
-    "Akhmeta",
-    "Batumi",
-    "Baku",
-    "Bakuriani",
-    "Baghdati",
-    "Bakhmaro",
-    "Bolnisi",
-    "Borjomi",
-    "Gamardzhveba",
-    "Gardabani",
-    "Gonio",
-    "Gori",
-    "Grigoleti",
-    "Gudamakari",
-    "Gudauri",
-    "Guria",
-    "Guria Shekvetili",
-    "Gurjaani",
-    "Dedoplistskaro",
-    "Dmanisi",
-    "Dusheti",
-    "Etsari",
-    "Vaziani",
-    "Vale",
-    "Vani",
-    "Vardisubani",
-    "Zemo Fonichala",
-    "Zestafoni",
-    "Zugdidi",
-    "Tbilisi",
-    "Tetritskaro",
-    "Telavi",
-    "Teleti",
-    "Terjola",
-    "Tianeti",
-    "Kazreti",
-    "Kaspi",
-    "Kvariati",
-    "Kisiskhevi",
-    "Lagodekhi",
-    "Lanchkhuti",
-    "Lentekhi",
-    "Lia",
-    "Lopota",
-    "Manglisi",
-    "Marneuli",
-    "Martvili",
-    "Martkofi",
-    "Makhinjauri",
-    "Mestia",
-    "Mtskheta",
-    "Natakhtari",
-    "Ninotsminda",
-    "Ozurgeti",
-    "Oni",
-    "Rustavi",
-    "Sagarejo",
-    "Saguramo",
-    "Sadakhlo",
-    "Sairme",
-    "Samtredia",
-    "Sartichala",
-    "Sarpi",
-    "Saka",
-    "Sachkhere",
-    "Senaki",
-    "Signagi",
-    "Stepantsminda",
-    "Surami",
-    "Tinishkidi",
-    "Tkibuli",
-    "Urbnisi",
-    "Ureki",
-    "Poti",
-    "Kareli",
-    "Keda",
-    "Kvemo Fonichala",
-    "Kvitiri",
-    "Kvesheti",
-    "Kobuleti",
-    "Kutaisi",
-    "Kazbegi",
-    "Kvareli",
-    "Sharabidzeebi",
-    "Shuakhevi",
-    "Chakvi",
-    "Chokhatauri",
-    "Chkhorotsku",
-    "Tsageri",
-    "Tsaishi",
-    "Tsalenjikha",
-    "Tsalka",
-    "Tsagveri",
-    "Tsiteli Khidi",
-    "Tsiteltskaro",
-    "Tsinandali",
-    "Tsnori",
-    "Tskaltubo",
-    "Chiatura",
-    "Kharagauli",
-    "Khashuri",
-    "Khelvachauri",
-    "Khobi",
-    "Khoni",
-    "Khulo",
-  ];
-  const countries = [
-    "Afghanistan",
-    "Albania",
-    "Algeria",
-    "Andorra",
-    "Angola",
-    "Argentina",
-    "Armenia",
-    "Australia",
-    "Austria",
-    "Azerbaijan",
-    "Bahamas",
-    "Bahrain",
-    "Bangladesh",
-    "Barbados",
-    "Belarus",
-    "Belgium",
-    "Belize",
-    "Benin",
-    "Bhutan",
-    "Bolivia",
-    "Bosnia and Herzegovina",
-    "Botswana",
-    "Brazil",
-    "Brunei",
-    "Bulgaria",
-    "Burkina Faso",
-    "Burundi",
-    "Cambodia",
-    "Cameroon",
-    "Canada",
-    "Cape Verde",
-    "Central African Republic",
-    "Chad",
-    "Chile",
-    "China",
-    "Colombia",
-    "Comoros",
-    "Costa Rica",
-    "Croatia",
-    "Cuba",
-    "Cyprus",
-    "Czech Republic",
-    "Denmark",
-    "Djibouti",
-    "Dominica",
-    "Dominican Republic",
-    "Ecuador",
-    "Egypt",
-    "El Salvador",
-    "Estonia",
-    "Eswatini",
-    "Ethiopia",
-    "Fiji",
-    "Finland",
-    "France",
-    "Gabon",
-    "Gambia",
-    "Georgia",
-    "Germany",
-    "Ghana",
-    "Greece",
-    "Grenada",
-    "Guatemala",
-    "Guinea",
-    "Guinea-Bissau",
-    "Guyana",
-    "Haiti",
-    "Honduras",
-    "Hungary",
-    "Iceland",
-    "India",
-    "Indonesia",
-    "Iran",
-    "Iraq",
-    "Ireland",
-    "Israel",
-    "Italy",
-    "Jamaica",
-    "Japan",
-    "Jordan",
-    "Kazakhstan",
-    "Kenya",
-    "Kiribati",
-    "Kuwait",
-    "Kyrgyzstan",
-    "Laos",
-    "Latvia",
-    "Lebanon",
-    "Lesotho",
-    "Liberia",
-    "Libya",
-    "Liechtenstein",
-    "Lithuania",
-    "Luxembourg",
-    "Madagascar",
-    "Malawi",
-    "Malaysia",
-    "Maldives",
-    "Mali",
-    "Malta",
-    "Mauritania",
-    "Mauritius",
-    "Mexico",
-    "Moldova",
-    "Monaco",
-    "Mongolia",
-    "Montenegro",
-    "Morocco",
-    "Mozambique",
-    "Myanmar",
-    "Namibia",
-    "Nauru",
-    "Nepal",
-    "Netherlands",
-    "New Zealand",
-    "Nicaragua",
-    "Niger",
-    "Nigeria",
-    "North Korea",
-    "North Macedonia",
-    "Norway",
-    "Oman",
-    "Pakistan",
-    "Palau",
-    "Panama",
-    "Papua New Guinea",
-    "Paraguay",
-    "Peru",
-    "Philippines",
-    "Poland",
-    "Portugal",
-    "Qatar",
-    "Romania",
-    "Russia",
-    "Rwanda",
-    "Saint Kitts and Nevis",
-    "Saint Lucia",
-    "Saint Vincent and the Grenadines",
-    "Samoa",
-    "San Marino",
-    "Sao Tome and Principe",
-    "Saudi Arabia",
-    "Senegal",
-    "Serbia",
-    "Seychelles",
-    "Sierra Leone",
-    "Singapore",
-    "Slovakia",
-    "Slovenia",
-    "Solomon Islands",
-    "Somalia",
-    "South Africa",
-    "South Korea",
-    "South Sudan",
-    "Spain",
-    "Sri Lanka",
-    "Sudan",
-    "Suriname",
-    "Sweden",
-    "Switzerland",
-    "Syria",
-    "Taiwan",
-    "Tajikistan",
-    "Tanzania",
-    "Thailand",
-    "Timor-Leste",
-    "Togo",
-    "Tonga",
-    "Trinidad and Tobago",
-    "Tunisia",
-    "Turkey",
-    "Turkmenistan",
-    "Tuvalu",
-    "Uganda",
-    "Ukraine",
-    "United Arab Emirates",
-    "United Kingdom",
-    "United States",
-    "Uruguay",
-    "Uzbekistan",
-    "Vanuatu",
-    "Vatican City",
-    "Venezuela",
-    "Vietnam",
-    "Yemen",
-    "Zambia",
-    "Zimbabwe",
-  ];
-
   const initialFields = {
     gender: "",
     firstName: "",
@@ -325,12 +21,13 @@ const HomePage = () => {
     city: "", // via ReusableSearchSelect
     email: "",
     phoneNumber: "",
-    verifivationCode: "",
+    verificationCode: "",
     cardNumber: "",
     promotionChanel1: null, // will be "true" or "false"
     promotionChanel2: null, // will be "true" or "false"
     termsAccepted: false,
     branch: "tbilisi",
+    prefix: "+995",
   };
 
   const [fieldsData, setFieldsData] = useState(initialFields);
@@ -343,9 +40,41 @@ const HomePage = () => {
   const [isVerified, setIsVerified] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [errors, setErrors] = useState({});
-  const [successMessage, setSuccessMessage] = useState("");
+  // const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [infoMessage, setInfoMessage] = useState("");
+
+  const fieldRefs = {
+    gender: React.useRef(null),
+    firstName: React.useRef(null),
+    lastName: React.useRef(null),
+    dateOfBirth: React.useRef(null),
+    address: React.useRef(null),
+    city: React.useRef(null),
+    country: React.useRef(null),
+    cardNumber: React.useRef(null),
+    phoneNumber: React.useRef(null),
+    verificationCode: React.useRef(null),
+    promotionChanel1: React.useRef(null),
+    promotionChanel2: React.useRef(null),
+    agree: React.useRef(null),
+  };
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCooldown((c) => c - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldown]);
+  const normalizePhone = (raw = "", prefix = "+995") => {
+    const cleaned = raw.replace(/[^0-9]/g, "");
+    const local = cleaned.startsWith("0") ? cleaned.slice(1) : cleaned;
+    return prefix.replace("+", "") + local;
+  };
 
   const handleShowTerms = (e) => {
     if (e.target && e.target.id.includes("open-terms")) {
@@ -359,12 +88,31 @@ const HomePage = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
+    // remove error instantly when user types/selects
+    setErrors((prev) => ({
+      ...prev,
+      [name]: undefined,
+    }));
+
     // Reset OTP when phone changes
     if (name === "phoneNumber") {
       setIsVerified(false);
       setOtpHash("");
       setToggleCode(false);
-      setFieldsData((prev) => ({ ...prev, verifivationCode: "" }));
+      setFieldsData((prev) => ({ ...prev, verificationCode: "" }));
+      setInfoMessage("");
+    }
+
+    // Reset OTP when prefix changes
+    if (name === "prefix") {
+      setIsVerified(false);
+      setOtpHash("");
+      setToggleCode(false);
+      setFieldsData((prev) => ({
+        ...prev,
+        verificationCode: "",
+      }));
+      setInfoMessage("");
     }
 
     setFieldsData((prev) => ({
@@ -374,20 +122,58 @@ const HomePage = () => {
   };
 
   const handleClear = () => {
-    setFieldsData(initialFields);
+    setFieldsData({ ...initialFields });
     setOtpHash("");
     setIsVerified(false);
     setToggleCode(false);
+    setCooldown(0);
+    setInfoMessage("");
   };
 
   // ------------------- SEND OTP -------------------
   const handleGetCode = async (e) => {
     e.preventDefault();
 
+    const raw = fieldsData.phoneNumber.trim();
+
+    // Basic check: empty
+    if (!raw) {
+      setErrors((prev) => ({
+        ...prev,
+        phoneNumber: "Please enter phone number",
+        verificationCode: "First enter valid phone number",
+      }));
+      return;
+    }
+
+    // Normalize phone (remove spaces, hyphens, symbols)
+    const cleaned = raw.replace(/[^0-9]/g, "");
+
+    // Format to Georgian 995xxx
+    let formattedPhone = normalizePhone(
+      fieldsData.phoneNumber,
+      fieldsData.prefix || "+995"
+    );
+
+    if (cleaned.length < 6 || cleaned.length > 9) {
+      setErrors((prev) => ({
+        ...prev,
+        phoneNumber: "Enter a valid phone number",
+        verificationCode: "First enter valid phone number",
+      }));
+      return;
+    }
+
+    // VALID — show info message
+    setInfoMessage(`Verification code was sent to ${formattedPhone}`);
+    setErrors((prev) => ({
+      ...prev,
+      verificationCode: undefined,
+    }));
     try {
-      const formattedPhone = fieldsData.phoneNumber.startsWith("995")
-        ? fieldsData.phoneNumber
-        : `995${fieldsData.phoneNumber.replace(/^0/, "")}`;
+      // const formattedPhone = fieldsData.phoneNumber.startsWith("995")
+      //   ? fieldsData.phoneNumber
+      //   : `995${fieldsData.phoneNumber.replace(/^0/, "")}`;
 
       const res = await fetch("http://localhost:5000/api/sms/send-otp", {
         method: "POST",
@@ -398,38 +184,51 @@ const HomePage = () => {
       const data = await res.json();
 
       if (!data.success) {
-        alert(data.error || "Error sending code");
+        setErrors((prev) => ({
+          ...prev,
+          phoneNumber: data.error || "Couldn't send code",
+        }));
         return;
       }
-
-      // cooldown timer
-      setCooldown(60);
-      const timer = setInterval(() => {
-        setCooldown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
 
       setOtpHash(data.hash);
       setToggleCode(true);
 
-      alert("კოდი გაიგზავნა");
+      // alert("კოდი გაიგზავნა");
     } catch (err) {
       console.error(err);
-      alert("ვერ გაიგზავნა კოდი");
+      // alert("ვერ გაიგზავნა კოდი");
+      setErrors((prev) => ({
+        ...prev,
+        phoneNumber: "Network error sending OTP",
+      }));
     }
   };
 
   const handleVerifyCode = async (e) => {
     e.preventDefault();
+    const raw = fieldsData.phoneNumber.trim();
+    const cleaned = raw.replace(/[^0-9]/g, "");
+
+    if (cleaned.length < 6 || cleaned.length > 9) {
+      setErrors((prev) => ({
+        ...prev,
+        phoneNumber: "Please first insert correct mobile number",
+      }));
+
+      return;
+    }
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy.verificationCode;
+      return copy;
+    });
+
     try {
-      const formattedPhone = fieldsData.phoneNumber.startsWith("995")
-        ? fieldsData.phoneNumber
-        : `995${fieldsData.phoneNumber.replace(/^0/, "")}`;
+      const formattedPhone = normalizePhone(
+        fieldsData.phoneNumber,
+        fieldsData.prefix || "+995"
+      );
 
       const res = await fetch("http://localhost:5000/api/sms/verify-otp", {
         method: "POST",
@@ -437,7 +236,7 @@ const HomePage = () => {
         body: JSON.stringify({
           phoneNumber: formattedPhone,
           hash: otpHash,
-          code: fieldsData.verifivationCode,
+          code: fieldsData.verificationCode,
         }),
       });
 
@@ -445,51 +244,86 @@ const HomePage = () => {
 
       if (data.success) {
         setIsVerified(true);
-        setToggleCode(false); // hide verify button
-        alert("კოდი სწორია ✔");
-      } else {
-        alert("კოდი არასწორია ❌");
+        setToggleCode(false);
+        setCooldown(0);
+        setInfoMessage("");
+        return;
       }
+
+      // OTP incorrect
+      setErrors((prev) => ({
+        ...prev,
+        verificationCode: data.message || "The verification code is incorrect.",
+      }));
     } catch (err) {
       console.error(err);
-      alert("ვერ მოხერხდა ვალიდაცია");
+      setErrors((prev) => ({
+        ...prev,
+        verificationCode: "Verification failed — try again.",
+      }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Manual validation
     const newErrors = {};
 
-    // Required fields
-    if (!fieldsData.gender) newErrors.gender = true;
-    if (!fieldsData.firstName.trim()) newErrors.firstName = true;
-    if (!fieldsData.lastName.trim()) newErrors.lastName = true;
-    if (!fieldsData.dateOfBirth) newErrors.dateOfBirth = true;
-    if (!fieldsData.phoneNumber.trim()) newErrors.phoneNumber = true;
-    if (!fieldsData.cardNumber.trim()) newErrors.cardNumber = true;
-    if (!fieldsData.city) newErrors.city = true;
-    if (!fieldsData.country) newErrors.country = true;
+    if (!fieldsData.gender) newErrors.gender = "select gender";
+    if (!fieldsData.firstName.trim()) newErrors.firstName = "enter first name";
+    if (!fieldsData.lastName.trim()) newErrors.lastName = "enter last name";
+    if (!fieldsData.dateOfBirth) newErrors.dateOfBirth = "enter birth date";
+    if (!fieldsData.address.trim()) newErrors.address = "enter address";
+    if (!fieldsData.city) newErrors.city = "select city";
+    if (!fieldsData.country) newErrors.country = "select country";
+    if (!fieldsData.cardNumber.trim())
+      newErrors.cardNumber = "enter card number";
+    if (!fieldsData.phoneNumber.trim())
+      newErrors.phoneNumber = "enter phone number";
 
-    // OTP Verification
-    if (!isVerified) newErrors.verifivationCode = true;
+    if (!isVerified) newErrors.verificationCode = "verify phone";
+
+    if (fieldsData.promotionChanel1 === null)
+      newErrors.promotionChanel1 = "select";
+    if (fieldsData.promotionChanel2 === null)
+      newErrors.promotionChanel2 = "select";
+
+    if (!fieldsData.termsAccepted) newErrors.termsAccepted = "accept terms";
 
     setErrors(newErrors);
 
-    console.log("Submitting →", fieldsData, errors);
-
+    // If errors exist → scroll to first one
     if (Object.keys(newErrors).length > 0) {
-      alert("გთხოვთ შეავსოთ მონიშნული ველები");
+      const firstErrorKey = Object.keys(newErrors)[0];
+      const ref = fieldRefs[firstErrorKey];
+
+      if (ref && ref.current) {
+        ref.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+
       return;
     }
 
     try {
       setLoading(true);
-      setSuccessMessage("");
+      // setSuccessMessage("");
+
+      const formattedPhone = normalizePhone(
+        fieldsData.phoneNumber,
+        fieldsData.prefix || "+995"
+      );
 
       const req = await fetch("http://localhost:5000/api/users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fieldsData),
+        body: JSON.stringify({
+          ...fieldsData,
+          phoneNumber: formattedPhone,
+        }),
       });
 
       const resData = await req.json();
@@ -533,7 +367,7 @@ const HomePage = () => {
       {showTerms && (
         <div
           id="open-terms-container"
-          className="fixed w-full h-full flex justify-center bg-stone-900/30 p-3 sm:py-9"
+          className="fixed w-full h-full z-10 flex justify-center bg-stone-900/30 p-3 sm:py-9"
           onClick={handleShowTerms}
         >
           <div className="relative max-w-[900px] bg-[#fff] px-5 pb-5 overflow-y-scroll rounded">
@@ -672,75 +506,146 @@ const HomePage = () => {
                     {t("registrationForm")}
                   </p>
                 </div>
-                <div className="flex flex-row gap-4">
+                {/* <div className="flex flex-col gap-2">
                   <div>
-                    <p className="text-[#040037] font-bold">{t("gener")}: </p>
+                    <p className="text-[#040037] font-bold">{t("gender")}: </p>
                   </div>
-                  {["female", "male", "other"].map((g) => (
-                    <label
-                      key={g}
-                      className="flex items-center gap-1 text-[#040037]"
-                    >
-                      <input
-                        type="radio"
-                        name="gender"
-                        value={g}
-                        checked={fieldsData.gender === g}
-                        onChange={handleChange}
-                        required
-                        className="border px-2 py-1 rounded flex-1 border-gray-700"
-                      />
-                      {g === "female"
-                        ? t("female")
-                        : g === "male"
-                        ? t("male")
-                        : t("other")}
-                    </label>
-                  ))}
+                  <div className="flex flex-row justify-around border p-1.5 rounded  border-gray-400">
+                    {["female", "male", "other"].map((g) => (
+                      <label
+                        key={g}
+                        className="flex items-center gap-1 text-[#040037]"
+                      >
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={g}
+                          checked={fieldsData.gender === g}
+                          onChange={handleChange}
+                          required
+                          className="border px-2 py-1 rounded flex-1 border-gray-700"
+                        />
+                        {g === "female"
+                          ? t("female")
+                          : g === "male"
+                          ? t("male")
+                          : t("other")}
+                      </label>
+                    ))}
+                  </div>
+                </div> */}
+                <div className="flex flex-col gap-2" ref={fieldRefs.gender}>
+                  <div>
+                    <p className="text-[#040037] font-bold">{t("gender")}: *</p>
+                    {errors.gender && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {t("pleaseSelectGender") || "Please select gender"}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-row justify-around rounded border-gray-400 bg-gray-400">
+                    {["female", "male", "other"].map((g, i) => {
+                      const isActive = fieldsData.gender === g;
+
+                      return (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => {
+                            // Clear gender error immediately when user clicks
+                            setErrors((prev) => ({ ...prev, gender: false }));
+                            handleChange({
+                              target: { name: "gender", value: g },
+                            });
+                          }}
+                          className={`px-4 py-2 font-medium transition-all flex-1 border cursor-pointer
+            ${i === 0 ? "rounded-l" : ""}
+            ${i === 2 ? "rounded-r" : ""}
+            ${
+              isActive
+                ? "bg-[#040037] border text-white shadow border-[#040037]"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-400"
+            }`}
+                        >
+                          {g === "female"
+                            ? t("female")
+                            : g === "male"
+                            ? t("male")
+                            : t("other")}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
+
                 <div className="flex flex-col gap-4 md:flex-row ">
-                  <div className="flex flex-col gap-2 md:w-[150px] ">
+                  <div
+                    className="flex flex-col justify-end gap-2 md:w-[150px] "
+                    ref={fieldRefs.firstName}
+                  >
                     <label
                       htmlFor="firstName"
                       className="text-[#040037] font-bold"
                     >
                       {t("firstName")} *
                     </label>
+                    {errors.firstName && (
+                      <p className="text-red-600 text-sm">
+                        Please enter your first name
+                      </p>
+                    )}
+
                     <input
                       id="firstName"
                       name="firstName"
                       type="text"
-                      className="border px-2 py-1 rounded flex-1 border-gray-400"
+                      className="border px-2 py-1 rounded border-gray-400"
                       value={fieldsData.firstName}
                       onChange={handleChange}
-                      required
                     />
                   </div>
-                  <div className="flex flex-col flex-1 gap-2">
+                  <div
+                    className="flex flex-col justify-end flex-1 gap-2"
+                    ref={fieldRefs.lastName}
+                  >
                     <label
                       htmlFor="lastName"
                       className="text-[#040037] font-bold"
                     >
                       {t("lastName")} *
                     </label>
+                    {errors.lastName && (
+                      <p className="text-red-600 text-sm">
+                        Please enter your last name
+                      </p>
+                    )}
+
                     <input
                       id="lastName"
                       name="lastName"
                       type="text"
-                      className="border px-2 py-1 rounded flex-1 border-gray-400"
+                      className="border px-2 py-1 rounded border-gray-400"
                       value={fieldsData.lastName}
                       onChange={handleChange}
-                      required
                     />
                   </div>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div
+                  className="flex flex-col gap-2"
+                  ref={fieldRefs.dateOfBirth}
+                >
                   <label
                     htmlFor="dateOfBirth"
                     className="text-[#040037] font-bold"
                   >
                     {t("birthDate")} *
                   </label>
+                  {errors.dateOfBirth && (
+                    <p className="text-red-600 text-sm">
+                      Please enter your birst Date
+                    </p>
+                  )}
+
                   <input
                     id="dateOfBirth"
                     className="border rounded px-2 py-1 border-gray-400"
@@ -751,13 +656,18 @@ const HomePage = () => {
                     onClick={(e) =>
                       e.target.showPicker && e.target.showPicker()
                     }
-                    required
                   />
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2" ref={fieldRefs.address}>
                   <label htmlFor="address" className="text-[#040037] font-bold">
                     {t("address")} *
                   </label>
+                  {errors.address && (
+                    <p className="text-red-600 text-sm">
+                      Please enter your address
+                    </p>
+                  )}
+
                   <input
                     id="address"
                     name="address"
@@ -765,14 +675,20 @@ const HomePage = () => {
                     className="border px-2 py-1 rounded flex-1 border-gray-400"
                     value={fieldsData.address}
                     onChange={handleChange}
-                    required
                   />
                 </div>
                 <div className="flex flex-row  gap-5">
-                  <div className="flex flex-col flex-1 gap-2">
+                  <div
+                    className="flex flex-col flex-1 gap-2"
+                    ref={fieldRefs.city}
+                  >
                     <label htmlFor="city" className="text-[#040037] font-bold">
                       {t("city")} *
                     </label>
+                    {errors.city && (
+                      <p className="text-red-600 text-sm">Please select city</p>
+                    )}
+
                     {/* <input
                       id="country"
                       name="country"
@@ -785,13 +701,14 @@ const HomePage = () => {
                       forElement="city"
                       options={regions}
                       value={fieldsData.city}
-                      onChange={(city) =>
-                        setFieldsData((prev) => ({ ...prev, city }))
-                      }
+                      onChange={(city) => {
+                        setErrors((prev) => ({ ...prev, city: undefined }));
+                        setFieldsData((prev) => ({ ...prev, city }));
+                      }}
                       error={errors.city}
                     />
                   </div>
-                  <div className="flex flex-col gap-2 w-[150px]">
+                  <div className="flex flex-col justify-end gap-2 w-[150px]">
                     <label
                       htmlFor="zipCode"
                       className="text-[#040037] font-bold"
@@ -802,34 +719,47 @@ const HomePage = () => {
                       id="zipCode"
                       name="zipCode"
                       type="text"
-                      className="border px-2 py-1 rounded flex-1 border-gray-400"
+                      className="border px-2 py-2 rounded border-gray-400 "
                       value={fieldsData.zipCode}
                       onChange={handleChange}
                     />
                   </div>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2" ref={fieldRefs.country}>
                   <label htmlFor="country" className="text-[#040037] font-bold">
                     {t("country")} *
                   </label>
+                  {errors.country && (
+                    <p className="text-red-600 text-sm">
+                      Please select country
+                    </p>
+                  )}
+
                   <ReusableSearchSelect
                     forElement="country"
                     options={countries}
                     value={fieldsData.country}
-                    onChange={(country) =>
-                      setFieldsData((prev) => ({ ...prev, country }))
-                    }
+                    onChange={(country) => {
+                      setErrors((prev) => ({ ...prev, country: undefined }));
+                      setFieldsData((prev) => ({ ...prev, country }));
+                    }}
                     error={errors.country}
                   />
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2" ref={fieldRefs.cardNumber}>
                   <label
                     htmlFor="cardNumber"
                     className="text-[#040037] font-bold"
                   >
                     {t("cardNumber")} *
                   </label>
+                  {errors.cardNumber && (
+                    <p className="text-red-600 text-sm">
+                      Please enter your Card number
+                    </p>
+                  )}
+
                   <input
                     placeholder="XXX-XXX-XXX-XXXXX"
                     id="cardNumber"
@@ -838,7 +768,6 @@ const HomePage = () => {
                     className="border px-2 py-1 rounded flex-1 border-gray-400"
                     value={fieldsData.cardNumber}
                     onChange={handleChange}
-                    required
                   />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -854,174 +783,273 @@ const HomePage = () => {
                     onChange={handleChange}
                   />
                 </div>
-                <div className="flex flex-col gap-2">
+                <div
+                  className="flex flex-col gap-2"
+                  ref={fieldRefs.phoneNumber}
+                >
                   <label
                     htmlFor="phoneNumber"
                     className="text-[#040037] font-bold"
                   >
                     {t("mobile")} *
                   </label>
-                  <input
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    type="Tel"
-                    className="border px-2 py-1 rounded flex-1 border-gray-400"
-                    value={fieldsData.phoneNumber}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="flex flex-row  gap-2 pt-1">
-                  <div className="flex flex-1">
-                    {/* <label htmlFor="">მობილურის ნომერი</label> */}
+                  {errors.phoneNumber && (
+                    <p className="text-red-600 text-sm">{errors.phoneNumber}</p>
+                  )}
+                  <div className="flex gap-4">
+                    <select
+                      className="border px-1 py-1 rounded border-gray-400 bg-white"
+                      value={fieldsData.prefix || "+995"}
+                      onChange={(e) =>
+                        handleChange({
+                          target: { name: "prefix", value: e.target.value },
+                        })
+                      }
+                    >
+                      {phonePrefixes.map((p) => (
+                        <option key={`${p.code}-${p.country}`} value={p.code}>
+                          {p.country} {p.code}
+                        </option>
+                      ))}
+                    </select>
                     <input
-                      name="verifivationCode"
-                      type="text"
-                      value={fieldsData.verifivationCode}
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      type="Tel"
+                      className="border px-2 py-1 rounded flex-1 border-gray-400"
+                      placeholder="ex: 555 12 34 56"
+                      value={fieldsData.phoneNumber}
                       onChange={handleChange}
-                      className={`border px-2 py-1 rounded flex-1
-    ${
-      isVerified
-        ? "border-green-500"
-        : errors.verifivationCode
-        ? "border-red-500"
-        : "border-gray-400"
-    }`}
                     />
                   </div>
-                  {!toggleCode && (
-                    <button
-                      type="button"
-                      disabled={cooldown > 0}
-                      onClick={handleGetCode}
-                      className={`px-5 py-1 rounded text-white  
+                </div>
+
+                <div
+                  className="flex flex-col  gap-2 pt-1"
+                  ref={fieldRefs.verificationCode}
+                >
+                  <div>
+                    <p className="text-[#040037] font-bold">
+                      {t("verificationCode")} *
+                    </p>
+                    {errors.verificationCode && (
+                      <p className="text-red-600 text-sm">
+                        {errors.verificationCode}
+                      </p>
+                    )}
+                    {infoMessage && (
+                      <p className="text-blue-600 text-sm">{infoMessage}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-1 gap-4">
+                    {/* <label htmlFor="">მობილურის ნომერი</label> */}
+                    <input
+                      name="verificationCode"
+                      type="text"
+                      value={fieldsData.verificationCode}
+                      onChange={handleChange}
+                      className={`border px-2 py-1 rounded flex-1
+                      ${
+                        isVerified
+                          ? "border-green-500"
+                          : errors.verificationCode
+                          ? "border-red-500"
+                          : "border-gray-400"
+                      }`}
+                    />
+
+                    {/* GET CODE BUTTON */}
+                    {!toggleCode && !isVerified && (
+                      <button
+                        type="button"
+                        disabled={cooldown > 0}
+                        onClick={handleGetCode}
+                        className={`px-5 py-1 rounded text-white  
     ${cooldown > 0 ? "bg-gray-400 cursor-not-allowed" : "bg-[#040037]"}`}
-                    >
-                      {cooldown > 0
-                        ? `${t("resendIn")} (${cooldown})`
-                        : `${t("getCode")}`}
-                    </button>
-                  )}
-                  {toggleCode && (
-                    <button
-                      className="bg-green-600 px-5 py-1 rounded text-stone-50"
-                      type="button"
-                      onClick={handleVerifyCode}
-                    >
-                      {t("verify")}
-                    </button>
-                  )}
+                      >
+                        {cooldown > 0
+                          ? `${t("resendIn")} (${cooldown})`
+                          : `${t("getCode")}`}
+                      </button>
+                    )}
+
+                    {/* VERIFY BUTTON */}
+                    {toggleCode && !isVerified && (
+                      <button
+                        className="bg-green-600 px-5 py-1 rounded text-stone-50"
+                        type="button"
+                        onClick={handleVerifyCode}
+                      >
+                        {t("verify")}
+                      </button>
+                    )}
+
+                    {/* STATUS: VERIFIED */}
+                    {isVerified && (
+                      <button
+                        type="button"
+                        disabled
+                        className="px-5 py-1 rounded bg-gray-300 text-gray-600 cursor-not-allowed"
+                      >
+                        {t("verified")}{" "}
+                        <span className="text-green-400">✔</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <p htmlFor="" className="text-[#040037] font-bold">
                     {t("receiveNews")}:
                   </p>
                   <div className="flex flex-col items-start justify-center gap-3">
-                    <div className="flex items-center gap-3">
-                      <p>{t("bySms")}:</p>
+                    <div
+                      className="flex flex-col items-start gap-3"
+                      ref={fieldRefs.promotionChanel1}
+                    >
+                      {errors.promotionChanel1 && (
+                        <p className="text-red-600 text-sm">Please select</p>
+                      )}
+                      <div className="flex items-center gap-3">
+                        <p>{t("bySms")}:</p>
 
-                      <div className="flex flex-row gap-2">
-                        <label htmlFor="promotionChanel1-yes">{t("yes")}</label>
-                        <input
-                          id="promotionChanel1-yes"
-                          type="radio"
-                          name="promotionChanel1"
-                          value="true"
-                          checked={fieldsData.promotionChanel1 === true}
-                          onChange={(e) =>
-                            setFieldsData((prev) => ({
-                              ...prev,
-                              promotionChanel1: e.target.value === "true",
-                            }))
-                          }
-                        />
-                      </div>
+                        <div className="flex flex-row gap-2">
+                          <label htmlFor="promotionChanel1-yes">
+                            {t("yes")}
+                          </label>
+                          <input
+                            id="promotionChanel1-yes"
+                            type="radio"
+                            name="promotionChanel1"
+                            value="true"
+                            checked={fieldsData.promotionChanel1 === true}
+                            onChange={(e) => {
+                              setErrors((prev) => ({
+                                ...prev,
+                                promotionChanel1: undefined,
+                              }));
 
-                      <div className="flex flex-row gap-2">
-                        <label htmlFor="promotionChanel1-no">{t("no")}</label>
-                        <input
-                          id="promotionChanel1-no"
-                          type="radio"
-                          name="promotionChanel1"
-                          value="false"
-                          checked={fieldsData.promotionChanel1 === false}
-                          onChange={(e) =>
-                            setFieldsData((prev) => ({
-                              ...prev,
-                              promotionChanel1:
-                                e.target.value === "true" ? true : false,
-                            }))
-                          }
-                          required
-                        />
+                              setFieldsData((prev) => ({
+                                ...prev,
+                                promotionChanel1: e.target.value === "true",
+                              }));
+                            }}
+                          />
+                        </div>
+
+                        <div className="flex flex-row gap-2">
+                          <label htmlFor="promotionChanel1-no">{t("no")}</label>
+                          <input
+                            id="promotionChanel1-no"
+                            type="radio"
+                            name="promotionChanel1"
+                            value="false"
+                            checked={fieldsData.promotionChanel1 === false}
+                            onChange={(e) => {
+                              setErrors((prev) => ({
+                                ...prev,
+                                promotionChanel1: undefined,
+                              }));
+
+                              setFieldsData((prev) => ({
+                                ...prev,
+                                promotionChanel1:
+                                  e.target.value === "true" ? true : false,
+                              }));
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
+                    <div
+                      className="flex flex-col items-start gap-3"
+                      ref={fieldRefs.promotionChanel2}
+                    >
+                      {errors.promotionChanel2 && (
+                        <p className="text-red-600 text-sm">Please select</p>
+                      )}
+                      <div className="flex flex-row items-start gap-3">
+                        <p>{t("byEmail")}:</p>
 
-                    <div className="flex items-center gap-3">
-                      <p>{t("byEmail")}:</p>
+                        <div className="flex flex-row gap-2">
+                          <label htmlFor="promotionChanel2-yes">
+                            {t("yes")}
+                          </label>
+                          <input
+                            id="promotionChanel2-yes"
+                            type="radio"
+                            name="promotionChanel2"
+                            value="true"
+                            checked={fieldsData.promotionChanel2 === true}
+                            onChange={(e) => {
+                              setErrors((prev) => ({
+                                ...prev,
+                                promotionChanel2: undefined,
+                              }));
 
-                      <div className="flex flex-row gap-2">
-                        <label htmlFor="promotionChanel2-yes">{t("yes")}</label>
-                        <input
-                          id="promotionChanel2-yes"
-                          type="radio"
-                          name="promotionChanel2"
-                          value="true"
-                          checked={fieldsData.promotionChanel2 === true}
-                          onChange={(e) =>
-                            setFieldsData((prev) => ({
-                              ...prev,
-                              promotionChanel2: e.target.value === "true",
-                            }))
-                          }
-                          required
-                        />
-                      </div>
+                              setFieldsData((prev) => ({
+                                ...prev,
+                                promotionChanel2: e.target.value === "true",
+                              }));
+                            }}
+                          />
+                        </div>
 
-                      <div className="flex flex-row gap-2">
-                        <label htmlFor="promotionChanel2-no">{t("no")}</label>
-                        <input
-                          id="promotionChanel2-no"
-                          type="radio"
-                          name="promotionChanel2"
-                          value="false"
-                          checked={fieldsData.promotionChanel2 === false}
-                          onChange={(e) =>
-                            setFieldsData((prev) => ({
-                              ...prev,
-                              promotionChanel2:
-                                e.target.value === "true" ? true : false,
-                            }))
-                          }
-                          required
-                        />
+                        <div className="flex flex-row gap-2">
+                          <label htmlFor="promotionChanel2-no">{t("no")}</label>
+                          <input
+                            id="promotionChanel2-no"
+                            type="radio"
+                            name="promotionChanel2"
+                            value="false"
+                            checked={fieldsData.promotionChanel2 === false}
+                            onChange={(e) => {
+                              setErrors((prev) => ({
+                                ...prev,
+                                promotionChanel2: undefined,
+                              }));
+                              setFieldsData((prev) => ({
+                                ...prev,
+                                promotionChanel2:
+                                  e.target.value === "true" ? true : false,
+                              }));
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-row gap-2">
-                  <input
-                    type="checkbox"
-                    checked={fieldsData.termsAccepted}
-                    onChange={(e) =>
-                      setFieldsData((prev) => ({
-                        ...prev,
-                        termsAccepted: e.target.checked,
-                      }))
-                    }
-                    required
-                  />
+                <div className="flex flex-col gap-2">
+                  {errors.termsAccepted && (
+                    <p className="text-red-600 text-sm">Please mark agree</p>
+                  )}
+                  <div className="flex flex-row items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={fieldsData.termsAccepted}
+                      onChange={(e) => {
+                        setErrors((prev) => ({
+                          ...prev,
+                          termsAccepted: undefined,
+                        }));
+                        setFieldsData((prev) => ({
+                          ...prev,
+                          termsAccepted: e.target.checked,
+                        }));
+                      }}
+                    />
 
-                  <p className="text-[#040037] font-bold">
-                    {t("termsAgreeText")}
-                    <span
-                      className="text-[#040037]/60 cursor-pointer underline ps-1"
-                      onClick={handleShowTerms}
-                      id="open-terms"
-                    >
-                      {t("termsAndConditions")}
-                    </span>
-                  </p>
+                    <p className="text-[#040037] font-bold">
+                      {t("termsAgreeText")}
+                      <span
+                        className="text-[#040037]/60 cursor-pointer underline ps-1"
+                        onClick={handleShowTerms}
+                        id="open-terms"
+                      >
+                        {t("termsAndConditions")}
+                      </span>
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-row gap-2">
                   <button

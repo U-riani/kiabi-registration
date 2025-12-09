@@ -69,7 +69,7 @@ const ReusableSearchSelect = ({
         value={query}
         onChange={(e) => handleInputChange(e.target.value)}
         onClick={() => setOpen(true)}
-        required
+        
       />
 
       {open && (

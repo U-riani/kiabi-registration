@@ -41,5 +41,7 @@
   "codeValid": "Code verified",
   "resendIn": "Resend in",
   "getCode": "Code",
-  "verify": "Verify"
+  "verify": "Verify",
+  
+  "pleaseSelectGender": "Please Select Gender"
 }

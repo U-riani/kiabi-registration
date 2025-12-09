@@ -42,5 +42,7 @@
   "codeValid": "კოდი დადასტურდა",
   "resendIn": "გამეორება",
   "getCode": "კოდი",
-  "verify": "დადასტურება"
+  "verify": "დადასტურება",
+
+  "pleaseSelectGender": "გთხოვთ მონიშნეთ სქესი"
 }
