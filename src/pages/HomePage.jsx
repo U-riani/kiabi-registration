@@ -10,6 +10,7 @@ import { countries } from "../data/countries";
 import { phonePrefixes } from "../data/phoneNumberPrefixes";
 
 const HomePage = () => {
+  const baseURL = "https://kiabi-loyalty-server.vercel.app";
   const initialFields = {
     gender: "",
     firstName: "",
@@ -199,7 +200,7 @@ const HomePage = () => {
       //   ? fieldsData.phoneNumber
       //   : `995${fieldsData.phoneNumber.replace(/^0/, "")}`;
 
-      const res = await fetch("http://localhost:5000/api/sms/send-otp", {
+      const res = await fetch(`${baseURL}/api/sms/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phoneNumber: formattedPhone }),
@@ -255,7 +256,7 @@ const HomePage = () => {
         fieldsData.prefix || "+995"
       );
 
-      const res = await fetch("http://localhost:5000/api/sms/verify-otp", {
+      const res = await fetch(`${baseURL}/api/sms/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -346,7 +347,7 @@ const HomePage = () => {
         fieldsData.prefix || "+995"
       );
 
-      const req = await fetch("http://localhost:5000/api/users/register", {
+      const req = await fetch(`${baseURL}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -414,7 +415,7 @@ const HomePage = () => {
         >
           <div className="relative max-w-[900px] bg-[#fff] px-5 pb-5 overflow-y-scroll rounded">
             <div className="flex flex-row justify-between bg-[#fff] py-5 sticky top-0">
-              <h4 className="text-xl font-bold ">წესები და პირობები</h4>
+              <h4 className="text-xl capitalize font-bold ">{t("termsAndConditions")}</h4>
               <button
                 type="button"
                 id="close-terms"
@@ -428,53 +429,45 @@ const HomePage = () => {
               <ol type="1" className="flex flex-col gap-1 mb-2">
                 <li>
                   <span>1. </span>
-                  წესებსა და პირობებზე თანხმობით თქვენ კომპანია „შპს არჩევანი“
-                  ს/კ 445389749, იურიდიული მისამართი: თბილისი, პეკინის #5
-                  ფაქტობრივი
+                  {t("termsRule1")}
                 </li>
                 <li>
                   <span>1.1 </span>
-                  კანონმდებლობის შესაბამისად, შეაგროვოს, შეინახოს და დაამუშავოს
-                  პერსონალური მონაცემები იმ მიზნ(ები)სათვის, რომლებიც
-                  განსაზღვრულია წესებსა და პირობებში.
+                  {t("termsRule1_2")}
                 </li>
                 <li>
                   <p>
                     <span>2. </span>
-                    პერსონალურ მონაცემებად განისაზღვრება:
-                    <br /> სახელი
-                    <br /> ტელეფონის ნომერი
-                    <br />
-                    პირადი ნომერი (საჭიროებისამებრ)
-                    <br /> პერსონალური მონაცემების შეგროვებას, შენახვას და
-                    დამუშავებას შპს „შპს არჩევანი“ ახორციელებს მარკეტინგული და
-                    მომსახურების გაუმჯობესების მიზნებისთვის, მომხმარებლისთვის
-                    ინფორმაციების გაზიარებისა და შეთავაზებების გაგზავნისთვის.
+                    {t("termsRule2")}
                   </p>
                 </li>
                 <li>
-                  <span>2. </span>
-                  კანონმდებლობის შესაბამისად, შეაგროვოს, შეინახოს და დაამუშავოს
-                  პერსონალური მონაცემები იმ მიზნ(ები)სათვის, რომლებიც
-                  განსაზღვრულია წესებსა და პირობებში.
+                  <span>3. </span>
+                  {t("termsRule3")}
                 </li>
                 <li>
-                  <span>2. </span>
-                  კანონმდებლობის შესაბამისად, შეაგროვოს, შეინახოს და დაამუშავოს
-                  პერსონალური მონაცემები იმ მიზნ(ები)სათვის, რომლებიც
-                  განსაზღვრულია წესებსა და პირობებში.
+                  <span>4. </span>
+                  {t("termsRule4")}
                 </li>
                 <li>
-                  <span>2. </span>
-                  კანონმდებლობის შესაბამისად, შეაგროვოს, შეინახოს და დაამუშავოს
-                  პერსონალური მონაცემები იმ მიზნ(ები)სათვის, რომლებიც
-                  განსაზღვრულია წესებსა და პირობებში.
+                  <span>5. </span>
+                  {t("termsRule5")}
                 </li>
                 <li>
-                  <span>2. </span>
-                  კანონმდებლობის შესაბამისად, შეაგროვოს, შეინახოს და დაამუშავოს
-                  პერსონალური მონაცემები იმ მიზნ(ები)სათვის, რომლებიც
-                  განსაზღვრულია წესებსა და პირობებში.
+                  <span>6. </span>
+                  {t("termsRule6")}
+                </li>
+                <li>
+                  <span>7. </span>
+                  {t("termsRule7")}
+                </li>
+                <li>
+                  <span>7.1 </span>
+                  {t("termsRule7_1")}
+                </li>
+                <li>
+                  <span>7.2 </span>
+                  {t("termsRule7_2")}
                 </li>
               </ol>
             </div>
