@@ -70,10 +70,34 @@ const HomePage = () => {
 
     return () => clearInterval(timer);
   }, [cooldown]);
-  const normalizePhone = (raw = "", prefix = "+995") => {
+
+  const isValidPhoneLength = (raw) => {
     const cleaned = raw.replace(/[^0-9]/g, "");
-    const local = cleaned.startsWith("0") ? cleaned.slice(1) : cleaned;
-    return prefix.replace("+", "") + local;
+    return cleaned.length >= 6 && cleaned.length <= 15;
+  };
+
+  const isValidEmail = (email) => {
+    if (!email) return true; // optional field → empty is valid
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const normalizePhone = (raw = "", prefix = "+995") => {
+    const numericPrefix = prefix.replace(/[^0-9]/g, "");
+    const cleaned = raw.replace(/[^0-9]/g, "");
+
+    if (!cleaned) return "";
+
+    // If user already typed full number (e.g. 9955xxxx)
+    if (cleaned.startsWith(numericPrefix)) {
+      return cleaned;
+    }
+
+    // Remove leading 0 (0555 → 555)
+    let local = cleaned;
+    if (local.startsWith("0")) local = local.slice(1);
+
+    return numericPrefix + local;
   };
 
   const handleShowTerms = (e) => {
@@ -147,7 +171,7 @@ const HomePage = () => {
     }
 
     // Normalize phone (remove spaces, hyphens, symbols)
-    const cleaned = raw.replace(/[^0-9]/g, "");
+    // const cleaned = raw.replace(/[^0-9]/g, "");
 
     // Format to Georgian 995xxx
     let formattedPhone = normalizePhone(
@@ -155,7 +179,7 @@ const HomePage = () => {
       fieldsData.prefix || "+995"
     );
 
-    if (cleaned.length < 6 || cleaned.length > 9) {
+    if (!isValidPhoneLength(raw)) {
       setErrors((prev) => ({
         ...prev,
         phoneNumber: "Enter a valid phone number",
@@ -193,6 +217,7 @@ const HomePage = () => {
 
       setOtpHash(data.hash);
       setToggleCode(true);
+      setCooldown(60); // Start 60-second cooldown ONLY when OTP sent successfully
 
       // alert("კოდი გაიგზავნა");
     } catch (err) {
@@ -208,9 +233,9 @@ const HomePage = () => {
   const handleVerifyCode = async (e) => {
     e.preventDefault();
     const raw = fieldsData.phoneNumber.trim();
-    const cleaned = raw.replace(/[^0-9]/g, "");
+    // const cleaned = raw.replace(/[^0-9]/g, "");
 
-    if (cleaned.length < 6 || cleaned.length > 9) {
+    if (!isValidPhoneLength(raw)) {
       setErrors((prev) => ({
         ...prev,
         phoneNumber: "Please first insert correct mobile number",
@@ -291,6 +316,10 @@ const HomePage = () => {
 
     if (!fieldsData.termsAccepted) newErrors.termsAccepted = "accept terms";
 
+    if (fieldsData.email && !isValidEmail(fieldsData.email.trim())) {
+      newErrors.email = "Enter a valid email";
+    }
+
     setErrors(newErrors);
 
     // If errors exist → scroll to first one
@@ -321,8 +350,21 @@ const HomePage = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...fieldsData,
+          gender: fieldsData.gender,
+          firstName: fieldsData.firstName.trim(),
+          lastName: fieldsData.lastName.trim(),
+          dateOfBirth: fieldsData.dateOfBirth,
+          address: fieldsData.address.trim(),
+          zipCode: fieldsData.zipCode.trim() || null,
+          country: fieldsData.country,
+          city: fieldsData.city,
+          email: fieldsData.email.trim() || null,
+          cardNumber: fieldsData.cardNumber.trim(),
           phoneNumber: formattedPhone,
+          promotionChanel1: fieldsData.promotionChanel1,
+          promotionChanel2: fieldsData.promotionChanel2,
+          termsAccepted: fieldsData.termsAccepted,
+          branch: fieldsData.branch,
         }),
       });
 
@@ -506,34 +548,7 @@ const HomePage = () => {
                     {t("registrationForm")}
                   </p>
                 </div>
-                {/* <div className="flex flex-col gap-2">
-                  <div>
-                    <p className="text-[#040037] font-bold">{t("gender")}: </p>
-                  </div>
-                  <div className="flex flex-row justify-around border p-1.5 rounded  border-gray-400">
-                    {["female", "male", "other"].map((g) => (
-                      <label
-                        key={g}
-                        className="flex items-center gap-1 text-[#040037]"
-                      >
-                        <input
-                          type="radio"
-                          name="gender"
-                          value={g}
-                          checked={fieldsData.gender === g}
-                          onChange={handleChange}
-                          required
-                          className="border px-2 py-1 rounded flex-1 border-gray-700"
-                        />
-                        {g === "female"
-                          ? t("female")
-                          : g === "male"
-                          ? t("male")
-                          : t("other")}
-                      </label>
-                    ))}
-                  </div>
-                </div> */}
+                
                 <div className="flex flex-col gap-2" ref={fieldRefs.gender}>
                   <div>
                     <p className="text-[#040037] font-bold">{t("gender")}: *</p>
@@ -771,9 +786,14 @@ const HomePage = () => {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="email" className="text-[#040037] font-bold">
-                    {t("email")}
-                  </label>
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="email" className="text-[#040037] font-bold">
+                      {t("email")}
+                    </label>
+                    {errors.email && (
+                      <p className="text-red-600 text-sm">{errors.email}</p>
+                    )}
+                  </div>
                   <input
                     id="email"
                     name="email"
@@ -828,7 +848,7 @@ const HomePage = () => {
                   className="flex flex-col  gap-2 pt-1"
                   ref={fieldRefs.verificationCode}
                 >
-                  <div>
+                  <div className="flex flex-col gap-2">
                     <p className="text-[#040037] font-bold">
                       {t("verificationCode")} *
                     </p>
