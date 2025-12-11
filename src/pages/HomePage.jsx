@@ -11,22 +11,22 @@ import { phonePrefixes } from "../data/phoneNumberPrefixes";
 import { getCountryName, getCountryOptions } from "../utils/countryHelpers";
 
 const HomePage = () => {
-  const baseURL = "https://kiabi-loyalty-server.vercel.app";
+  // const baseURL = "https://kiabi-loyalty-server.vercel.app";
+  const baseURL = "http://localhost:5000";
   const initialFields = {
     gender: "",
     firstName: "",
     lastName: "",
     dateOfBirth: "",
     address: "",
-    zipCode: "",
     country: "", // via ReusableSearchSelect
     city: "", // via ReusableSearchSelect
     email: "",
     phoneNumber: "",
     verificationCode: "",
     cardNumber: "",
-    promotionChanel1: null, // will be "true" or "false"
-    promotionChanel2: null, // will be "true" or "false"
+    promotionChanel1: true, // will be "true" or "false"
+    promotionChanel2: true, // will be "true" or "false"
     termsAccepted: false,
     branch: "tbilisi",
     prefix: "+995",
@@ -58,10 +58,57 @@ const HomePage = () => {
     cardNumber: React.useRef(null),
     phoneNumber: React.useRef(null),
     verificationCode: React.useRef(null),
-    promotionChanel1: React.useRef(null),
-    promotionChanel2: React.useRef(null),
     agree: React.useRef(null),
   };
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const lat = coords.latitude;
+        const lon = coords.longitude;
+
+        // Rough example branch zones
+        if (lat > 41.65 && lon > 44.7) {
+          // Tbilisi area
+          setFieldsData((prev) => ({ ...prev, branch: "tbilisi" }));
+        } else if (lat > 41.6 && lon < 41.7) {
+          // Batumi-ish area
+          setFieldsData((prev) => ({ ...prev, branch: "batumi" }));
+        } else {
+          // Default fallback
+          setFieldsData((prev) => ({ ...prev, branch: "tbilisi" }));
+        }
+      },
+      (err) => {
+        console.warn("Branch auto-detect blocked:", err);
+      },
+      { enableHighAccuracy: true }
+    );
+  }, []);
+
+  console.log(fieldsData.branch);
+
+  useEffect(() => {
+    setFieldsData((prev) => {
+      // if user has already selected something → do nothing
+      if (prev.country) {
+        console.log("ffff");
+        return prev;
+      }
+
+      if (i18n.language === "ka") {
+        return { ...prev, country: 57 };
+      }
+
+      if (i18n.language === "en") {
+        return { ...prev, country: "" };
+      }
+
+      return prev;
+    });
+  }, [i18n.language]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -338,12 +385,6 @@ const HomePage = () => {
     if (!isVerified) {
       newErrors.verificationCode = "verify phone";
     }
-
-    if (fieldsData.promotionChanel1 === null)
-      newErrors.promotionChanel1 = "select";
-    if (fieldsData.promotionChanel2 === null)
-      newErrors.promotionChanel2 = "select";
-
     if (!fieldsData.termsAccepted) newErrors.termsAccepted = "accept terms";
 
     if (fieldsData.email && !isValidEmail(fieldsData.email.trim())) {
@@ -385,7 +426,6 @@ const HomePage = () => {
           lastName: fieldsData.lastName.trim(),
           dateOfBirth: fieldsData.dateOfBirth,
           address: fieldsData.address.trim(),
-          zipCode: fieldsData.zipCode.trim() || null,
           country: getCountryName(regions, fieldsData.country, "en"),
           city: getCountryName(regions, fieldsData.city, "en"),
           email: fieldsData.email.trim() || null,
@@ -397,6 +437,7 @@ const HomePage = () => {
           branch: fieldsData.branch,
         }),
       });
+      console.log(fieldsData.termsAccepted);
 
       const resData = await req.json();
 
@@ -681,7 +722,7 @@ const HomePage = () => {
                   </label>
                   {errors.dateOfBirth && (
                     <p className="text-red-600 text-sm">
-                      Please enter your birst Date
+                      Please enter your birth Date
                     </p>
                   )}
 
@@ -749,22 +790,6 @@ const HomePage = () => {
                         setFieldsData((prev) => ({ ...prev, city: id }));
                       }}
                       error={errors.city}
-                    />
-                  </div>
-                  <div className="flex flex-col justify-end gap-2 w-[150px]">
-                    <label
-                      htmlFor="zipCode"
-                      className="text-[#040037] font-bold"
-                    >
-                      {t("zipCode")}
-                    </label>
-                    <input
-                      id="zipCode"
-                      name="zipCode"
-                      type="text"
-                      className="border px-2 py-2 rounded border-gray-400 "
-                      value={fieldsData.zipCode}
-                      onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -949,7 +974,7 @@ const HomePage = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col gap-2">
+                {/* <div className="flex flex-col gap-2">
                   <p htmlFor="" className="text-[#040037] font-bold">
                     {t("receiveNews")}:
                   </p>
@@ -1070,7 +1095,7 @@ const HomePage = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
                 <div className="flex flex-col gap-2">
                   {errors.termsAccepted && (
                     <p className="text-red-600 text-sm">Please mark agree</p>
