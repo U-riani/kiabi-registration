@@ -11,8 +11,8 @@ import { phonePrefixes } from "../data/phoneNumberPrefixes";
 import { getCountryName, getCountryOptions } from "../utils/countryHelpers";
 
 const HomePage = () => {
-  const baseURL = "https://kiabi-loyalty-server.vercel.app";
-  // const baseURL = "http://localhost:5000";
+  // const baseURL = "https://kiabi-loyalty-server.vercel.app";
+  const baseURL = "http://localhost:5000";
   const initialFields = {
     gender: "",
     firstName: "",
@@ -46,6 +46,8 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [infoMessage, setInfoMessage] = useState("");
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
 
   const fieldRefs = {
     gender: React.useRef(null),
@@ -91,23 +93,11 @@ const HomePage = () => {
   console.log(fieldsData.branch);
 
   useEffect(() => {
-    setFieldsData((prev) => {
-      // if user has already selected something → do nothing
-      if (prev.country) {
-        console.log("ffff");
-        return prev;
-      }
-
-      if (i18n.language === "ka") {
-        return { ...prev, country: 57 };
-      }
-
-      if (i18n.language === "en") {
-        return { ...prev, country: "" };
-      }
-
-      return prev;
-    });
+    setFieldsData((prev) => ({
+      ...prev,
+      country: i18n.language === "ka" ? 57 : "",
+      city: "",
+    }));
   }, [i18n.language]);
 
   useEffect(() => {
@@ -221,43 +211,48 @@ const HomePage = () => {
   const handleGetCode = async (e) => {
     e.preventDefault();
 
+    if (sendingCode || cooldown > 0) return; // safety
+
+    setSendingCode(true);
+    setErrors((prev) => ({ ...prev, phoneNumber: null }));
+
     const raw = fieldsData.phoneNumber.trim();
-
-    // Basic check: empty
-    if (!raw) {
-      setErrors((prev) => ({
-        ...prev,
-        phoneNumber: "Please enter phone number",
-        verificationCode: "First enter valid phone number",
-      }));
-      return;
-    }
-
-    // Normalize phone (remove spaces, hyphens, symbols)
-    // const cleaned = raw.replace(/[^0-9]/g, "");
-
-    // Format to Georgian 995xxx
-    let formattedPhone = normalizePhone(
-      fieldsData.phoneNumber,
-      fieldsData.prefix || "+995"
-    );
-
-    if (!isValidPhoneLength(raw)) {
-      setErrors((prev) => ({
-        ...prev,
-        phoneNumber: "Enter a valid phone number",
-        verificationCode: "First enter valid phone number",
-      }));
-      return;
-    }
-
-    // VALID — show info message
-    setInfoMessage(`Verification code was sent to ${formattedPhone}`);
-    setErrors((prev) => ({
-      ...prev,
-      verificationCode: undefined,
-    }));
     try {
+      // Basic check: empty
+      if (!raw) {
+        setErrors((prev) => ({
+          ...prev,
+          phoneNumber: "Please enter phone number",
+          verificationCode: "First enter valid phone number",
+        }));
+        return;
+      }
+
+      // Normalize phone (remove spaces, hyphens, symbols)
+      // const cleaned = raw.replace(/[^0-9]/g, "");
+
+      // Format to Georgian 995xxx
+      let formattedPhone = normalizePhone(
+        fieldsData.phoneNumber,
+        fieldsData.prefix || "+995"
+      );
+
+      if (!isValidPhoneLength(raw)) {
+        setErrors((prev) => ({
+          ...prev,
+          phoneNumber: "Enter a valid phone number",
+          verificationCode: "First enter valid phone number",
+        }));
+        return;
+      }
+
+      // VALID — show info message
+      setInfoMessage(`Verification code was sent to ${formattedPhone}`);
+      setErrors((prev) => ({
+        ...prev,
+        verificationCode: undefined,
+      }));
+
       // const formattedPhone = fieldsData.phoneNumber.startsWith("995")
       //   ? fieldsData.phoneNumber
       //   : `995${fieldsData.phoneNumber.replace(/^0/, "")}`;
@@ -290,11 +285,19 @@ const HomePage = () => {
         ...prev,
         phoneNumber: "Network error sending OTP",
       }));
+    } finally {
+      setSendingCode(false);
     }
   };
 
   const handleVerifyCode = async (e) => {
     e.preventDefault();
+    e.preventDefault();
+
+    if (verifyingCode) return;
+
+    setVerifyingCode(true);
+    setErrors((prev) => ({ ...prev, verificationCode: null }));
     const raw = fieldsData.phoneNumber.trim();
     // const cleaned = raw.replace(/[^0-9]/g, "");
 
@@ -349,6 +352,8 @@ const HomePage = () => {
         ...prev,
         verificationCode: "Verification failed — try again.",
       }));
+    } finally {
+      setVerifyingCode(false);
     }
   };
 
@@ -426,7 +431,7 @@ const HomePage = () => {
           lastName: fieldsData.lastName.trim(),
           dateOfBirth: fieldsData.dateOfBirth,
           address: fieldsData.address.trim(),
-          country: getCountryName(regions, fieldsData.country, "en"),
+          country: getCountryName(countries, fieldsData.country, "en"),
           city: getCountryName(regions, fieldsData.city, "en"),
           email: fieldsData.email.trim() || null,
           cardNumber: fieldsData.cardNumber.trim(),
@@ -939,25 +944,39 @@ const HomePage = () => {
                     {!toggleCode && !isVerified && (
                       <button
                         type="button"
-                        disabled={cooldown > 0}
+                        disabled={cooldown > 0 || sendingCode}
                         onClick={handleGetCode}
                         className={`px-5 py-1 rounded text-white  
-    ${cooldown > 0 ? "bg-gray-400 cursor-not-allowed" : "bg-[#040037]"}`}
+    ${
+      cooldown > 0 || sendingCode
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-[#040037]"
+    }`}
                       >
-                        {cooldown > 0
+                        {sendingCode
+                          ? t("sendingCode") || "Sending..."
+                          : cooldown > 0
                           ? `${t("resendIn")} (${cooldown})`
-                          : `${t("getCode")}`}
+                          : t("getCode")}
                       </button>
                     )}
 
                     {/* VERIFY BUTTON */}
                     {toggleCode && !isVerified && (
                       <button
-                        className="bg-green-600 px-5 py-1 rounded text-stone-50"
                         type="button"
+                        disabled={verifyingCode}
                         onClick={handleVerifyCode}
+                        className={`px-5 py-1 rounded text-white 
+    ${
+      verifyingCode
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-green-600 hover:bg-green-700"
+    }`}
                       >
-                        {t("verify")}
+                        {verifyingCode
+                          ? t("checking") || "Checking..."
+                          : t("verify")}
                       </button>
                     )}
 
