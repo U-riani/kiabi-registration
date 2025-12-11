@@ -11,8 +11,8 @@ import { phonePrefixes } from "../data/phoneNumberPrefixes";
 import { getCountryName, getCountryOptions } from "../utils/countryHelpers";
 
 const HomePage = () => {
-  // const baseURL = "https://kiabi-loyalty-server.vercel.app";
-  const baseURL = "http://localhost:5000";
+  const baseURL = "https://kiabi-loyalty-server.vercel.app";
+  // const baseURL = "http://localhost:5000";
   const initialFields = {
     gender: "",
     firstName: "",
