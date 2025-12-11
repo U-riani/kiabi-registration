@@ -9,7 +9,7 @@ const LanguageButton = () => {
   };
 
   return (
-    <div className="absolute right-0 m-1 p-1">
+    <div className="fixed right-0 m-1 p-1">
       <button
         onClick={toggleLanguage}
         className="w-7 h-7 hover:scale-105 transition cursor-pointer"

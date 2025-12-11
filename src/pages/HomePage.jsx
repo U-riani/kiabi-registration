@@ -8,6 +8,7 @@ import LanguageButton from "../components/LanguageButton";
 import { regions } from "../data/regions";
 import { countries } from "../data/countries";
 import { phonePrefixes } from "../data/phoneNumberPrefixes";
+import { getCountryName, getCountryOptions } from "../utils/countryHelpers";
 
 const HomePage = () => {
   const baseURL = "https://kiabi-loyalty-server.vercel.app";
@@ -33,7 +34,7 @@ const HomePage = () => {
 
   const [fieldsData, setFieldsData] = useState(initialFields);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [showTerms, setShowTerms] = useState(false);
   const [otpHash, setOtpHash] = useState("");
@@ -75,6 +76,20 @@ const HomePage = () => {
   const isValidPhoneLength = (raw) => {
     const cleaned = raw.replace(/[^0-9]/g, "");
     return cleaned.length >= 6 && cleaned.length <= 15;
+  };
+
+  const isValidPhoneNumber = (raw, prefix = "+995") => {
+    const numericPrefix = prefix.replace(/[^0-9]/g, "");
+    const cleaned = raw.replace(/[^0-9]/g, "");
+
+    // nothing entered
+    if (!cleaned) return false;
+
+    // remove leading zero (0555 → 555)
+    let local = cleaned.startsWith("0") ? cleaned.slice(1) : cleaned;
+
+    // local part must be between 4–12 digits (international safe)
+    return local.length >= 6 && local.length <= 12;
   };
 
   const isValidEmail = (email) => {
@@ -305,10 +320,24 @@ const HomePage = () => {
     if (!fieldsData.country) newErrors.country = "select country";
     if (!fieldsData.cardNumber.trim())
       newErrors.cardNumber = "enter card number";
-    if (!fieldsData.phoneNumber.trim())
-      newErrors.phoneNumber = "enter phone number";
 
-    if (!isVerified) newErrors.verificationCode = "verify phone";
+    // Normalize phone for submit
+    const formattedPhone = normalizePhone(
+      fieldsData.phoneNumber,
+      fieldsData.prefix || "+995"
+    );
+
+    /// PHONE NUMBER VALIDATION
+    if (!fieldsData.phoneNumber.trim()) {
+      newErrors.phoneNumber = "Please enter phone number";
+    } else if (!isValidPhoneLength(fieldsData.phoneNumber)) {
+      newErrors.phoneNumber = "Enter a valid phone number";
+    }
+
+    // VERIFICATION CHECK
+    if (!isVerified) {
+      newErrors.verificationCode = "verify phone";
+    }
 
     if (fieldsData.promotionChanel1 === null)
       newErrors.promotionChanel1 = "select";
@@ -357,8 +386,8 @@ const HomePage = () => {
           dateOfBirth: fieldsData.dateOfBirth,
           address: fieldsData.address.trim(),
           zipCode: fieldsData.zipCode.trim() || null,
-          country: fieldsData.country,
-          city: fieldsData.city,
+          country: getCountryName(regions, fieldsData.country, "en"),
+          city: getCountryName(regions, fieldsData.city, "en"),
           email: fieldsData.email.trim() || null,
           cardNumber: fieldsData.cardNumber.trim(),
           phoneNumber: formattedPhone,
@@ -415,7 +444,9 @@ const HomePage = () => {
         >
           <div className="relative max-w-[900px] bg-[#fff] px-5 pb-5 overflow-y-scroll rounded">
             <div className="flex flex-row justify-between bg-[#fff] py-5 sticky top-0">
-              <h4 className="text-xl capitalize font-bold ">{t("termsAndConditions")}</h4>
+              <h4 className="text-xl capitalize font-bold ">
+                {t("termsAndConditions")}
+              </h4>
               <button
                 type="button"
                 id="close-terms"
@@ -541,7 +572,7 @@ const HomePage = () => {
                     {t("registrationForm")}
                   </p>
                 </div>
-                
+
                 <div className="flex flex-col gap-2" ref={fieldRefs.gender}>
                   <div>
                     <p className="text-[#040037] font-bold">{t("gender")}: *</p>
@@ -707,11 +738,15 @@ const HomePage = () => {
                     /> */}
                     <ReusableSearchSelect
                       forElement="city"
-                      options={regions}
-                      value={fieldsData.city}
-                      onChange={(city) => {
+                      options={getCountryOptions(regions, i18n.language)}
+                      value={getCountryName(
+                        regions,
+                        fieldsData.city,
+                        i18n.language
+                      )}
+                      onChange={(id) => {
                         setErrors((prev) => ({ ...prev, city: undefined }));
-                        setFieldsData((prev) => ({ ...prev, city }));
+                        setFieldsData((prev) => ({ ...prev, city: id }));
                       }}
                       error={errors.city}
                     />
@@ -745,11 +780,15 @@ const HomePage = () => {
 
                   <ReusableSearchSelect
                     forElement="country"
-                    options={countries}
-                    value={fieldsData.country}
-                    onChange={(country) => {
+                    options={getCountryOptions(countries, i18n.language)}
+                    value={getCountryName(
+                      countries,
+                      fieldsData.country,
+                      i18n.language
+                    )}
+                    onChange={(id) => {
                       setErrors((prev) => ({ ...prev, country: undefined }));
-                      setFieldsData((prev) => ({ ...prev, country }));
+                      setFieldsData((prev) => ({ ...prev, country: id }));
                     }}
                     error={errors.country}
                   />

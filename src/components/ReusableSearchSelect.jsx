@@ -20,29 +20,31 @@ const ReusableSearchSelect = ({
     query.trim() === ""
       ? options
       : options.filter((item) =>
-          item.toLowerCase().startsWith(query.toLowerCase())
+          item.label.toLowerCase().startsWith(query.toLowerCase())
         );
 
   // Select item
   const handleSelect = (item) => {
-    setQuery(item);
-    onChange(item);
+    setQuery(item.label);
+    onChange(item.id); // return ID
     setOpen(false);
   };
 
   // On typing
   const handleInputChange = (val) => {
-    const normalized = options.find(
-      (item) => item.toLowerCase() === val.toLowerCase()
+    setQuery(val);
+
+    const match = options.find(
+      (item) => item.label.toLowerCase() === val.toLowerCase()
     );
 
-    if (normalized) {
-      setQuery(normalized);
-      onChange(normalized);
+    if (match) {
+      onChange(match.id);
     } else {
-      setQuery(val);
-      onChange(""); // invalid
+      onChange(null);
     }
+
+    setOpen(true);
 
     setOpen(true);
   };
@@ -69,7 +71,6 @@ const ReusableSearchSelect = ({
         value={query}
         onChange={(e) => handleInputChange(e.target.value)}
         onClick={() => setOpen(true)}
-        
       />
 
       {open && (
@@ -79,11 +80,11 @@ const ReusableSearchSelect = ({
           ) : (
             filtered.map((item) => (
               <div
-                key={item}
+                key={item.id}
                 onClick={() => handleSelect(item)}
                 className="p-2 cursor-pointer hover:bg-blue-100"
               >
-                {item}
+                {item.label}
               </div>
             ))
           )}
