@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import RegionCitySelect from "../components/RegionCitySelect ";
@@ -11,7 +11,10 @@ import { phonePrefixes } from "../data/phoneNumberPrefixes";
 import { getCountryName, getCountryOptions } from "../utils/countryHelpers";
 import PhonePrefixSelect from "../components/PhonePrefixSelect";
 
-const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
+const getDaysInMonth = (month, year) => {
+  if (!month || !year) return 31;
+  return new Date(year, month, 0).getDate();
+};
 
 export const MONTHS = {
   en: [
@@ -62,8 +65,8 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - i);
 
 const HomePage = () => {
-  // const baseURL = "https://kiabi-loyalty-server.vercel.app";
-  const baseURL = "http://localhost:5000";
+  const baseURL = "https://kiabi-loyalty-server.vercel.app";
+  // const baseURL = "http://localhost:5000";
 
   const CARD_MASK = "XXX XXX XXX XXX XX";
   const CARD_MAX_DIGITS = 14;
@@ -72,7 +75,9 @@ const HomePage = () => {
     gender: "",
     firstName: "",
     lastName: "",
-    dateOfBirth: "",
+    birthDay: "",
+    birthMonth: "",
+    birthYear: "",
     address: "",
     country: null,
     city: null,
@@ -88,6 +93,10 @@ const HomePage = () => {
   };
 
   const [fieldsData, setFieldsData] = useState(initialFields);
+
+  const daysInSelectedMonth = useMemo(() => {
+    return getDaysInMonth(fieldsData.birthMonth, fieldsData.birthYear);
+  }, [fieldsData.birthMonth, fieldsData.birthYear]);
 
   const { t, i18n } = useTranslation();
 
@@ -120,6 +129,22 @@ const HomePage = () => {
 
   const phoneInputRef = React.useRef(null);
   const cardInputRef = React.useRef(null);
+
+  const isAtLeast14 = (day, month, year) => {
+    if (!day || !month || !year) return false;
+
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age >= 14;
+  };
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -394,10 +419,16 @@ const HomePage = () => {
     // Manual validation
     const newErrors = {};
 
+    // birthdate validation
+    const { birthDay, birthMonth, birthYear } = fieldsData;
+    if (!birthDay || !birthMonth || !birthYear) {
+      newErrors.dateOfBirth = t("PleaseEnterYourBirthDate");
+    } else if (!isAtLeast14(birthDay, birthMonth, birthYear)) {
+      newErrors.dateOfBirth = t("YouMustBeAtLeast14");
+    }
     if (!fieldsData.gender) newErrors.gender = "select gender";
     if (!fieldsData.firstName.trim()) newErrors.firstName = "enter first name";
     if (!fieldsData.lastName.trim()) newErrors.lastName = "enter last name";
-    if (!fieldsData.dateOfBirth) newErrors.dateOfBirth = "enter birth date";
     if (!fieldsData.address.trim()) newErrors.address = "enter address";
     if (fieldsData.city === null || fieldsData.city === undefined)
       newErrors.city = "select city";
@@ -454,6 +485,10 @@ const HomePage = () => {
       const phone = normalized.startsWith(numericPrefix)
         ? normalized.slice(numericPrefix.length)
         : normalized;
+      const formattedBirthDate = `${birthYear}-${String(birthMonth).padStart(
+        2,
+        "0"
+      )}-${String(birthDay).padStart(2, "0")}`;
 
       const req = await fetch(`${baseURL}/api/users/register`, {
         method: "POST",
@@ -462,7 +497,7 @@ const HomePage = () => {
           gender: fieldsData.gender,
           firstName: fieldsData.firstName.trim(),
           lastName: fieldsData.lastName.trim(),
-          dateOfBirth: fieldsData.dateOfBirth,
+          dateOfBirth: formattedBirthDate,
           address: fieldsData.address.trim(),
           country: getCountryName(countries, fieldsData.country, "en"),
           city: getCountryName(regions, fieldsData.city, "en"),
@@ -602,6 +637,23 @@ const HomePage = () => {
       verificationCode: "",
     }));
   }, [fieldsData.phoneNumber, fieldsData.prefix]);
+
+  useEffect(() => {
+  const maxDay = getDaysInMonth(
+    fieldsData.birthMonth,
+    fieldsData.birthYear
+  );
+
+  if (
+    fieldsData.birthDay &&
+    Number(fieldsData.birthDay) > maxDay
+  ) {
+    setFieldsData((prev) => ({
+      ...prev,
+      birthDay: "",
+    }));
+  }
+}, [fieldsData.birthMonth, fieldsData.birthYear]);
 
   return (
     <div className="relative">
@@ -863,29 +915,94 @@ const HomePage = () => {
                   className="flex flex-col gap-2"
                   ref={fieldRefs.dateOfBirth}
                 >
-                  <label
-                    htmlFor="dateOfBirth"
-                    className="text-[#040037] font-bold"
+                  <div
+                    className="flex flex-col gap-2"
+                    ref={fieldRefs.dateOfBirth}
                   >
-                    {t("birthDate")} *
-                  </label>
-                  {errors.dateOfBirth && (
-                    <p className="text-red-600 text-sm">
-                      Please enter your birth Date
-                    </p>
-                  )}
+                    <label className="text-[#040037] font-bold">
+                      {t("birthDate")} *
+                    </label>
 
-                  <input
-                    id="dateOfBirth"
-                    className="border rounded px-2 py-1 border-gray-400"
-                    name="dateOfBirth"
-                    type="date"
-                    value={fieldsData.dateOfBirth}
-                    onChange={handleChange}
-                    onClick={(e) =>
-                      e.target.showPicker && e.target.showPicker()
-                    }
-                  />
+                    {errors.dateOfBirth && (
+                      <p className="text-red-600 text-sm">
+                        {errors.dateOfBirth}
+                      </p>
+                    )}
+
+                    <div className="flex gap-3">
+                      {/* DAY */}
+                      <select
+                        value={fieldsData.birthDay}
+                        onChange={(e) => {
+                          setErrors((prev) => ({
+                            ...prev,
+                            dateOfBirth: undefined,
+                          }));
+                          setFieldsData((p) => ({
+                            ...p,
+                            birthDay: e.target.value,
+                          }));
+                        }}
+                        className="border px-2 py-1 rounded flex-1 border-gray-400"
+                      >
+                        <option value="">{t("day")}</option>
+                        {Array.from(
+                          { length: daysInSelectedMonth },
+                          (_, i) => i + 1
+                        ).map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* MONTH */}
+                      <select
+                        value={fieldsData.birthMonth}
+                        onChange={(e) => {
+                          setErrors((prev) => ({
+                            ...prev,
+                            dateOfBirth: undefined,
+                          }));
+                          setFieldsData((p) => ({
+                            ...p,
+                            birthMonth: e.target.value,
+                          }));
+                        }}
+                        className="border px-2 py-1 rounded flex-1 border-gray-400"
+                      >
+                        <option value="">{t("month")}</option>
+                        {MONTHS[i18n.language].map((m) => (
+                          <option key={m.value} value={m.value}>
+                            {m.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* YEAR */}
+                      <select
+                        value={fieldsData.birthYear}
+                        onChange={(e) => {
+                          setErrors((prev) => ({
+                            ...prev,
+                            dateOfBirth: undefined,
+                          }));
+                          setFieldsData((p) => ({
+                            ...p,
+                            birthYear: e.target.value,
+                          }));
+                        }}
+                        className="border px-2 py-1 rounded flex-1 border-gray-400"
+                      >
+                        <option value="">{t("year")}</option>
+                        {YEARS.map((y) => (
+                          <option key={y} value={y}>
+                            {y}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex flex-col gap-2" ref={fieldRefs.address}>
                   <label htmlFor="address" className="text-[#040037] font-bold">

@@ -54,5 +54,10 @@
   "termsRule6": "The company is authorized to store the information collected under the Terms and Conditions for a period of 10 (ten) years.",
   "termsRule7": "The user has the right to request information at any time about their personal data stored by the company.",
   "termsRule7_1": "The user may submit a request via the LLC GTEX hotline: 0032 2 920 777 or in writing via email: info@gtex.ge.",
-  "termsRule7_2": "Each SMS message includes an SMS NO option “Refuse SMS notifications”, therefore the user may opt out of SMS notifications."
+  "termsRule7_2": "Each SMS message includes an SMS NO option “Refuse SMS notifications”, therefore the user may opt out of SMS notifications.",
+  "PleaseEnterYourBirthDate": "Please enter your birth date",
+  "YouMustBeAtLeast14": "You must be at least 14 years old",
+  "day": "DAY",
+  "month": "MONTH",
+  "year": "YEAR"
 }
