@@ -9,18 +9,73 @@ import { regions } from "../data/regions";
 import { countries } from "../data/countries";
 import { phonePrefixes } from "../data/phoneNumberPrefixes";
 import { getCountryName, getCountryOptions } from "../utils/countryHelpers";
+import PhonePrefixSelect from "../components/PhonePrefixSelect";
+
+const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
+
+export const MONTHS = {
+  en: [
+    { value: 1, label: "January" },
+    { value: 2, label: "February" },
+    { value: 3, label: "March" },
+    { value: 4, label: "April" },
+    { value: 5, label: "May" },
+    { value: 6, label: "June" },
+    { value: 7, label: "July" },
+    { value: 8, label: "August" },
+    { value: 9, label: "September" },
+    { value: 10, label: "October" },
+    { value: 11, label: "November" },
+    { value: 12, label: "December" },
+  ],
+  ka: [
+    { value: 1, label: "იანვარი" },
+    { value: 2, label: "თებერვალი" },
+    { value: 3, label: "მარტი" },
+    { value: 4, label: "აპრილი" },
+    { value: 5, label: "მაისი" },
+    { value: 6, label: "ივნისი" },
+    { value: 7, label: "ივლისი" },
+    { value: 8, label: "აგვისტო" },
+    { value: 9, label: "სექტემბერი" },
+    { value: 10, label: "ოქტომბერი" },
+    { value: 11, label: "ნოემბერი" },
+    { value: 12, label: "დეკემბერი" },
+  ],
+  ru: [
+    { value: 1, label: "Январь" },
+    { value: 2, label: "Февраль" },
+    { value: 3, label: "Март" },
+    { value: 4, label: "Апрель" },
+    { value: 5, label: "Май" },
+    { value: 6, label: "Июнь" },
+    { value: 7, label: "Июль" },
+    { value: 8, label: "Август" },
+    { value: 9, label: "Сентябрь" },
+    { value: 10, label: "Октябрь" },
+    { value: 11, label: "Ноябрь" },
+    { value: 12, label: "Декабрь" },
+  ],
+};
+
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - i);
 
 const HomePage = () => {
-  const baseURL = "https://kiabi-loyalty-server.vercel.app";
-  // const baseURL = "http://localhost:5000";
+  // const baseURL = "https://kiabi-loyalty-server.vercel.app";
+  const baseURL = "http://localhost:5000";
+
+  const CARD_MASK = "XXX XXX XXX XXX XX";
+  const CARD_MAX_DIGITS = 14;
+
   const initialFields = {
     gender: "",
     firstName: "",
     lastName: "",
     dateOfBirth: "",
     address: "",
-    country: "", // via ReusableSearchSelect
-    city: "", // via ReusableSearchSelect
+    country: null,
+    city: null,
     email: "",
     phoneNumber: "",
     verificationCode: "",
@@ -28,7 +83,7 @@ const HomePage = () => {
     promotionChanel1: true, // will be "true" or "false"
     promotionChanel2: true, // will be "true" or "false"
     termsAccepted: false,
-    branch: "tbilisi",
+    branch: "",
     prefix: "+995",
   };
 
@@ -63,30 +118,28 @@ const HomePage = () => {
     agree: React.useRef(null),
   };
 
+  const phoneInputRef = React.useRef(null);
+  const cardInputRef = React.useRef(null);
+
   useEffect(() => {
     if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
-        const lat = coords.latitude;
-        const lon = coords.longitude;
+        const { longitude } = coords;
 
-        // Rough example branch zones
-        if (lat > 41.65 && lon > 44.7) {
-          // Tbilisi area
-          setFieldsData((prev) => ({ ...prev, branch: "tbilisi" }));
-        } else if (lat > 41.6 && lon < 41.7) {
-          // Batumi-ish area
+        // West Georgia → Batumi
+        if (longitude < 43.5) {
           setFieldsData((prev) => ({ ...prev, branch: "batumi" }));
-        } else {
-          // Default fallback
+        }
+        // East Georgia → Tbilisi
+        else {
           setFieldsData((prev) => ({ ...prev, branch: "tbilisi" }));
         }
       },
-      (err) => {
-        console.warn("Branch auto-detect blocked:", err);
-      },
-      { enableHighAccuracy: true }
+      () => {
+        setFieldsData((prev) => ({ ...prev, branch: "tbilisi" }));
+      }
     );
   }, []);
 
@@ -95,8 +148,8 @@ const HomePage = () => {
   useEffect(() => {
     setFieldsData((prev) => ({
       ...prev,
-      country: i18n.language === "ka" ? 57 : "",
-      city: "",
+      country: i18n.language === "ka" ? 57 : null,
+      city: null,
     }));
   }, [i18n.language]);
 
@@ -113,20 +166,6 @@ const HomePage = () => {
   const isValidPhoneLength = (raw) => {
     const cleaned = raw.replace(/[^0-9]/g, "");
     return cleaned.length >= 6 && cleaned.length <= 15;
-  };
-
-  const isValidPhoneNumber = (raw, prefix = "+995") => {
-    const numericPrefix = prefix.replace(/[^0-9]/g, "");
-    const cleaned = raw.replace(/[^0-9]/g, "");
-
-    // nothing entered
-    if (!cleaned) return false;
-
-    // remove leading zero (0555 → 555)
-    let local = cleaned.startsWith("0") ? cleaned.slice(1) : cleaned;
-
-    // local part must be between 4–12 digits (international safe)
-    return local.length >= 6 && local.length <= 12;
   };
 
   const isValidEmail = (email) => {
@@ -171,25 +210,18 @@ const HomePage = () => {
       [name]: undefined,
     }));
 
-    // Reset OTP when phone changes
-    if (name === "phoneNumber") {
+    // Reset OTP when phone changes and when prefix changes
+    if (name === "phoneNumber" || name === "prefix") {
       setIsVerified(false);
-      setOtpHash("");
       setToggleCode(false);
-      setFieldsData((prev) => ({ ...prev, verificationCode: "" }));
+      setOtpHash("");
+      setCooldown(0);
       setInfoMessage("");
-    }
 
-    // Reset OTP when prefix changes
-    if (name === "prefix") {
-      setIsVerified(false);
-      setOtpHash("");
-      setToggleCode(false);
       setFieldsData((prev) => ({
         ...prev,
         verificationCode: "",
       }));
-      setInfoMessage("");
     }
 
     setFieldsData((prev) => ({
@@ -292,7 +324,6 @@ const HomePage = () => {
 
   const handleVerifyCode = async (e) => {
     e.preventDefault();
-    e.preventDefault();
 
     if (verifyingCode) return;
 
@@ -368,16 +399,12 @@ const HomePage = () => {
     if (!fieldsData.lastName.trim()) newErrors.lastName = "enter last name";
     if (!fieldsData.dateOfBirth) newErrors.dateOfBirth = "enter birth date";
     if (!fieldsData.address.trim()) newErrors.address = "enter address";
-    if (!fieldsData.city) newErrors.city = "select city";
-    if (!fieldsData.country) newErrors.country = "select country";
+    if (fieldsData.city === null || fieldsData.city === undefined)
+      newErrors.city = "select city";
+    if (fieldsData.country === null || fieldsData.country === undefined)
+      newErrors.country = "select country";
     if (!fieldsData.cardNumber.trim())
       newErrors.cardNumber = "enter card number";
-
-    // Normalize phone for submit
-    const formattedPhone = normalizePhone(
-      fieldsData.phoneNumber,
-      fieldsData.prefix || "+995"
-    );
 
     /// PHONE NUMBER VALIDATION
     if (!fieldsData.phoneNumber.trim()) {
@@ -417,10 +444,16 @@ const HomePage = () => {
       setLoading(true);
       // setSuccessMessage("");
 
-      const formattedPhone = normalizePhone(
+      const normalized = normalizePhone(
         fieldsData.phoneNumber,
-        fieldsData.prefix || "+995"
+        fieldsData.prefix
       );
+
+      const numericPrefix = fieldsData.prefix.replace(/\D/g, "");
+
+      const phone = normalized.startsWith(numericPrefix)
+        ? normalized.slice(numericPrefix.length)
+        : normalized;
 
       const req = await fetch(`${baseURL}/api/users/register`, {
         method: "POST",
@@ -435,7 +468,8 @@ const HomePage = () => {
           city: getCountryName(regions, fieldsData.city, "en"),
           email: fieldsData.email.trim() || null,
           cardNumber: fieldsData.cardNumber.trim(),
-          phoneNumber: formattedPhone,
+          phoneNumber: phone,
+          phoneCode: fieldsData.prefix,
           promotionChanel1: fieldsData.promotionChanel1,
           promotionChanel2: fieldsData.promotionChanel2,
           termsAccepted: fieldsData.termsAccepted,
@@ -458,6 +492,116 @@ const HomePage = () => {
       setLoading(false);
     }
   };
+
+  const GLOBAL_MAX_DIGITS = 15;
+
+  const getCursorPosFromDigits = (digitsLength, mask) => {
+    let pos = 0;
+    let digitsSeen = 0;
+
+    for (let i = 0; i < mask.length; i++) {
+      if (mask[i] === "X") {
+        if (digitsSeen === digitsLength) break;
+        digitsSeen++;
+      }
+      pos++;
+    }
+
+    return pos;
+  };
+
+  const getPhoneMaskByPrefix = (prefix) => {
+    switch (prefix) {
+      case "+995":
+        return {
+          mask: "XXX XX XX XX",
+          maxDigits: 9, // local Georgian number
+        };
+
+      default:
+        return {
+          mask: "XXXXXXXXXXXXXXX",
+          maxDigits: GLOBAL_MAX_DIGITS,
+        };
+    }
+  };
+
+  const maskNumber = (digits = "", mask = "") => {
+    let result = "";
+    let i = 0;
+
+    for (const char of mask) {
+      if (char === "X") {
+        result += digits[i] ?? "X";
+        i++;
+      } else {
+        result += char;
+      }
+    }
+
+    return result;
+  };
+  const { mask, maxDigits } = getPhoneMaskByPrefix(fieldsData.prefix);
+
+  useEffect(() => {
+    const el = phoneInputRef.current;
+    if (!el) return;
+
+    const cursorPos = getCursorPosFromDigits(
+      fieldsData.phoneNumber.length,
+      mask
+    );
+
+    requestAnimationFrame(() => {
+      el.setSelectionRange(cursorPos, cursorPos);
+    });
+  }, [fieldsData.phoneNumber, mask]);
+
+  useEffect(() => {
+    const el = cardInputRef.current;
+    if (!el) return;
+
+    const cursorPos = getCursorPosFromDigits(
+      fieldsData.cardNumber.length,
+      CARD_MASK
+    );
+
+    requestAnimationFrame(() => {
+      el.setSelectionRange(cursorPos, cursorPos);
+    });
+  }, [fieldsData.cardNumber]);
+
+  useEffect(() => {
+    setFieldsData((prev) => {
+      // 🇬🇪 Georgia: enforce leading 5
+      if (fieldsData.prefix === "+995") {
+        if (!prev.phoneNumber.startsWith("5")) {
+          return { ...prev, phoneNumber: "5" + prev.phoneNumber };
+        }
+        return prev;
+      }
+
+      // 🌍 Other countries: remove forced Georgian 5
+      if (prev.phoneNumber.startsWith("5")) {
+        return { ...prev, phoneNumber: prev.phoneNumber.slice(1) };
+      }
+
+      return prev;
+    });
+  }, [fieldsData.prefix]);
+
+  useEffect(() => {
+    setIsVerified(false);
+    setToggleCode(false);
+    setOtpHash("");
+    setCooldown(0);
+    setInfoMessage("");
+
+    setFieldsData((prev) => ({
+      ...prev,
+      verificationCode: "",
+    }));
+  }, [fieldsData.phoneNumber, fieldsData.prefix]);
 
   return (
     <div className="relative">
@@ -838,13 +982,63 @@ const HomePage = () => {
                   )}
 
                   <input
-                    placeholder="XXX-XXX-XXX-XXXXX"
+                    ref={cardInputRef}
                     id="cardNumber"
                     name="cardNumber"
                     type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    spellCheck={false}
                     className="border px-2 py-1 rounded flex-1 border-gray-400"
-                    value={fieldsData.cardNumber}
-                    onChange={handleChange}
+                    value={maskNumber(fieldsData.cardNumber, CARD_MASK)}
+                    onKeyDown={(e) => {
+                      const allowedKeys = [
+                        "Backspace",
+                        "Tab",
+                        "ArrowLeft",
+                        "ArrowRight",
+                        "Delete",
+                      ];
+
+                      // BACKSPACE
+                      if (e.key === "Backspace") {
+                        e.preventDefault();
+                        setFieldsData((prev) => ({
+                          ...prev,
+                          cardNumber: prev.cardNumber.slice(0, -1),
+                        }));
+                        return;
+                      }
+
+                      // Allow navigation
+                      if (allowedKeys.includes(e.key)) return;
+
+                      // Digits only
+                      if (!/^[0-9]$/.test(e.key)) {
+                        e.preventDefault();
+                        return;
+                      }
+
+                      // Add digit
+                      e.preventDefault();
+                      setFieldsData((prev) => {
+                        if (prev.cardNumber.length >= CARD_MAX_DIGITS)
+                          return prev;
+                        return {
+                          ...prev,
+                          cardNumber: prev.cardNumber + e.key,
+                        };
+                      });
+                    }}
+                    onFocus={(e) => {
+                      requestAnimationFrame(() => {
+                        const cursorPos = getCursorPosFromDigits(
+                          fieldsData.cardNumber.length,
+                          CARD_MASK
+                        );
+                        e.target.setSelectionRange(cursorPos, cursorPos);
+                      });
+                    }}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -879,29 +1073,83 @@ const HomePage = () => {
                     <p className="text-red-600 text-sm">{errors.phoneNumber}</p>
                   )}
                   <div className="flex gap-4">
-                    <select
-                      className="border px-1 py-1 rounded border-gray-400 bg-white"
-                      value={fieldsData.prefix || "+995"}
-                      onChange={(e) =>
+                    <PhonePrefixSelect
+                      value={fieldsData.prefix}
+                      onChange={(code) =>
                         handleChange({
-                          target: { name: "prefix", value: e.target.value },
+                          target: { name: "prefix", value: code },
                         })
                       }
-                    >
-                      {phonePrefixes.map((p) => (
-                        <option key={`${p.code}-${p.country}`} value={p.code}>
-                          {p.country} {p.code}
-                        </option>
-                      ))}
-                    </select>
+                    />
+
                     <input
+                      ref={phoneInputRef}
                       id="phoneNumber"
                       name="phoneNumber"
-                      type="Tel"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      spellCheck={false}
                       className="border px-2 py-1 rounded flex-1 border-gray-400"
-                      placeholder="ex: 555 12 34 56"
-                      value={fieldsData.phoneNumber}
-                      onChange={handleChange}
+                      value={maskNumber(fieldsData.phoneNumber, mask)}
+                      onKeyDown={(e) => {
+                        const allowedKeys = [
+                          "Backspace",
+                          "Tab",
+                          "ArrowLeft",
+                          "ArrowRight",
+                          "Delete",
+                        ];
+
+                        // BACKSPACE (single source of truth)
+                        if (e.key === "Backspace") {
+                          e.preventDefault();
+                          setFieldsData((prev) => {
+                            // 🇬🇪 Protect mandatory leading 5
+                            if (
+                              prev.prefix === "+995" &&
+                              prev.phoneNumber.length <= 1
+                            ) {
+                              return prev;
+                            }
+                            return {
+                              ...prev,
+                              phoneNumber: prev.phoneNumber.slice(0, -1),
+                            };
+                          });
+                          return;
+                        }
+
+                        // Other control keys
+                        if (allowedKeys.includes(e.key)) {
+                          return;
+                        }
+
+                        // Digits only
+                        if (!/^[0-9]$/.test(e.key)) {
+                          e.preventDefault();
+                          return;
+                        }
+
+                        // Add digit
+                        e.preventDefault();
+                        setFieldsData((prev) => {
+                          if (prev.phoneNumber.length >= maxDigits) return prev;
+                          return {
+                            ...prev,
+                            phoneNumber: prev.phoneNumber + e.key,
+                          };
+                        });
+                      }}
+                      onFocus={(e) => {
+                        requestAnimationFrame(() => {
+                          const cursorPos = getCursorPosFromDigits(
+                            fieldsData.phoneNumber.length,
+                            mask
+                          );
+                          e.target.setSelectionRange(cursorPos, cursorPos);
+                        });
+                      }}
                     />
                   </div>
                 </div>

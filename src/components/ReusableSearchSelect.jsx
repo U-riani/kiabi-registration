@@ -20,7 +20,7 @@ const ReusableSearchSelect = ({
     query.trim() === ""
       ? options
       : options.filter((item) =>
-          item.label.toLowerCase().startsWith(query.toLowerCase())
+          item.label.toLowerCase().includes(query.toLowerCase())
         );
 
   // Select item
@@ -32,22 +32,10 @@ const ReusableSearchSelect = ({
 
   // On typing
   const handleInputChange = (val) => {
-    setQuery(val);
+  setQuery(val);
+  setOpen(true);
+};
 
-    const match = options.find(
-      (item) => item.label.toLowerCase() === val.toLowerCase()
-    );
-
-    if (match) {
-      onChange(match.id);
-    } else {
-      onChange(null);
-    }
-
-    setOpen(true);
-
-    setOpen(true);
-  };
 
   // Close dropdown on outside click
   useEffect(() => {
