@@ -65,8 +65,8 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - i);
 
 const HomePage = () => {
-  const baseURL = "https://kiabi-loyalty-server.vercel.app";
-  // const baseURL = "http://localhost:5000";
+  // const baseURL = "https://kiabi-loyalty-server.vercel.app";
+  const baseURL = "http://localhost:5000";
 
   const CARD_MASK = "XXX XXX XXX XXX XX";
   const CARD_MAX_DIGITS = 14;
@@ -293,7 +293,13 @@ const HomePage = () => {
         fieldsData.phoneNumber,
         fieldsData.prefix || "+995"
       );
-
+      if (!formattedPhone) {
+        setErrors((prev) => ({
+          ...prev,
+          phoneNumber: "Invalid phone number",
+        }));
+        return;
+      }
       if (!isValidPhoneLength(raw)) {
         setErrors((prev) => ({
           ...prev,
@@ -313,7 +319,7 @@ const HomePage = () => {
       // const formattedPhone = fieldsData.phoneNumber.startsWith("995")
       //   ? fieldsData.phoneNumber
       //   : `995${fieldsData.phoneNumber.replace(/^0/, "")}`;
-
+console.log(formattedPhone)
       const res = await fetch(`${baseURL}/api/sms/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -639,21 +645,15 @@ const HomePage = () => {
   }, [fieldsData.phoneNumber, fieldsData.prefix]);
 
   useEffect(() => {
-  const maxDay = getDaysInMonth(
-    fieldsData.birthMonth,
-    fieldsData.birthYear
-  );
+    const maxDay = getDaysInMonth(fieldsData.birthMonth, fieldsData.birthYear);
 
-  if (
-    fieldsData.birthDay &&
-    Number(fieldsData.birthDay) > maxDay
-  ) {
-    setFieldsData((prev) => ({
-      ...prev,
-      birthDay: "",
-    }));
-  }
-}, [fieldsData.birthMonth, fieldsData.birthYear]);
+    if (fieldsData.birthDay && Number(fieldsData.birthDay) > maxDay) {
+      setFieldsData((prev) => ({
+        ...prev,
+        birthDay: "",
+      }));
+    }
+  }, [fieldsData.birthMonth, fieldsData.birthYear]);
 
   return (
     <div className="relative">
@@ -1077,6 +1077,7 @@ const HomePage = () => {
                       fieldsData.country,
                       i18n.language
                     )}
+                    flags
                     onChange={(id) => {
                       setErrors((prev) => ({ ...prev, country: undefined }));
                       setFieldsData((prev) => ({ ...prev, country: id }));

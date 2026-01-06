@@ -32,10 +32,9 @@ const ReusableSearchSelect = ({
 
   // On typing
   const handleInputChange = (val) => {
-  setQuery(val);
-  setOpen(true);
-};
-
+    setQuery(val);
+    setOpen(true);
+  };
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -50,17 +49,18 @@ const ReusableSearchSelect = ({
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
-      <input
-        id={forElement}
-        name={forElement}
-        type="text"
-        className="border px-3 py-2 rounded border-gray-400 w-full cursor-pointer "
-        placeholder="Select..."
-        value={query}
-        onChange={(e) => handleInputChange(e.target.value)}
-        onClick={() => setOpen(true)}
-      />
-
+      <div>
+        <input
+          id={forElement}
+          name={forElement}
+          type="text"
+          className="border px-3 py-2 rounded border-gray-400 w-full cursor-pointer "
+          placeholder="Select..."
+          value={query}
+          onChange={(e) => handleInputChange(e.target.value)}
+          onClick={() => setOpen(true)}
+        />
+      </div>
       {open && (
         <div className="absolute top-full left-0 right-0 bg-white border rounded shadow-lg max-h-60 overflow-y-auto z-50">
           {filtered.length === 0 ? (
@@ -70,8 +70,15 @@ const ReusableSearchSelect = ({
               <div
                 key={item.id}
                 onClick={() => handleSelect(item)}
-                className="p-2 cursor-pointer hover:bg-blue-100"
+                className="p-2 cursor-pointer hover:bg-blue-100 flex flex-row items-center"
               >
+                {item.flag && (
+                  <img
+                    className=" mr-2 object-contain shadow-xs border border-slate-300"
+                    src={`https://flagcdn.com/w20/${item.flag.toLocaleLowerCase()}.png`}
+                  />
+                )}
+                {console.log(item)}
                 {item.label}
               </div>
             ))

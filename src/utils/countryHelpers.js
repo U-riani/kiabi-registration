@@ -8,6 +8,7 @@ export const getCountryOptions = (countries, lang = "en") => {
   return Object.values(countries).map(c => ({
     id: c.id,
     label: c[lang],
+    flag: c.flag
   }));
 };
 
