@@ -319,7 +319,7 @@ const HomePage = () => {
       // const formattedPhone = fieldsData.phoneNumber.startsWith("995")
       //   ? fieldsData.phoneNumber
       //   : `995${fieldsData.phoneNumber.replace(/^0/, "")}`;
-console.log(formattedPhone)
+      console.log(formattedPhone);
       const res = await fetch(`${baseURL}/api/sms/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -670,7 +670,9 @@ console.log(formattedPhone)
             </p>
             <button
               className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
-              onClick={() => setShowSuccessModal(false)}
+              onClick={() => {
+                window.location.reload();
+              }}
             >
               OK
             </button>
