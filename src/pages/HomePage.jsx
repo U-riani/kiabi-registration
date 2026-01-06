@@ -65,8 +65,8 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - i);
 
 const HomePage = () => {
-  // const baseURL = "https://kiabi-loyalty-server.vercel.app";
-  const baseURL = "http://localhost:5000";
+  const baseURL = "https://kiabi-loyalty-server.vercel.app";
+  // const baseURL = "http://localhost:5000";
 
   const CARD_MASK = "XXX XXX XXX XXX XX";
   const CARD_MAX_DIGITS = 14;
