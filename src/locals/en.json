@@ -59,5 +59,17 @@
   "YouMustBeAtLeast14": "You must be at least 14 years old",
   "day": "DAY",
   "month": "MONTH",
-  "year": "YEAR"
+  "year": "YEAR",
+  "termsAndConditionError": "Please accept terms",
+  "verifyPhone": "Please verify phone",
+  "EnterValidPhoneNumber": "Enter a valid phone number",
+  "FirstEnterValidPhoneNumber": "First enter a valid phone number",
+  "enterCardNumber": "Please enter card number",
+  "enterValidCardNumber": "Please enter valid card number",
+  "selectCity": "Please select city",
+  "selectCountry": "Please select country",
+  "PleaseEnterAddress": "Please enter your address",
+  "PleaseEnterFirstName": "Please enter your first name",
+  "PleaseEnterLastName": "Please enter your last name",
+  "pleaseEnterValidEmail": "Please enter valid email"
 }

@@ -34,6 +34,11 @@ const ReusableSearchSelect = ({
   const handleInputChange = (val) => {
     setQuery(val);
     setOpen(true);
+
+    // 🔥 IMPORTANT: clear selection when input is cleared
+    if (val.trim() === "") {
+      onChange(null);
+    }
   };
 
   // Close dropdown on outside click
@@ -54,11 +59,25 @@ const ReusableSearchSelect = ({
           id={forElement}
           name={forElement}
           type="text"
+          autoComplete="new-password"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
           className="border px-3 py-2 rounded border-gray-400 w-full cursor-pointer "
           placeholder="Select..."
           value={query}
           onChange={(e) => handleInputChange(e.target.value)}
           onClick={() => setOpen(true)}
+          onBlur={() => {
+            const match = options.find(
+              (o) => o.label.toLowerCase() === query.toLowerCase()
+            );
+
+            if (!match) {
+              setQuery("");
+              onChange(null);
+            }
+          }}
         />
       </div>
       {open && (
@@ -78,7 +97,6 @@ const ReusableSearchSelect = ({
                     src={`https://flagcdn.com/w20/${item.flag.toLocaleLowerCase()}.png`}
                   />
                 )}
-                {console.log(item)}
                 {item.label}
               </div>
             ))

@@ -4,14 +4,10 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 
 function App() {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-      </Routes>
-      <Routes>
-        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-      </Routes>
-    </>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+    </Routes>
   );
 }
 

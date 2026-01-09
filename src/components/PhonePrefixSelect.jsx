@@ -13,7 +13,7 @@ const PhonePrefixSelect = ({ value, onChange }) => {
         className="flex items-center gap-2 border px-2 py-1 rounded cursor-pointer bg-white"
       >
         <img
-          className="w-5"
+          className="w-5 border-1 border-slate-300 shadowed shadow-lg"
           src={`https://flagcdn.com/w20/${selected.country.toLocaleLowerCase()}.png`}
         />{" "}
         <span>{selected.country}</span>

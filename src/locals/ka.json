@@ -60,5 +60,17 @@
   "YouMustBeAtLeast14": "თქვენ მინიმუმ 14 წლის უნდა იყოთ",
   "day": "დღე",
   "month": "თვე",
-  "year": "წელი"
+  "year": "წელი",
+  "termsAndConditionError": "გთხოვთ დაგვიდასტუროთ თანხმობა",
+  "verifyPhone": "გთხოვთ გაიარეთ მობილურის ნომრის ვერიფიკაცია",
+  "EnterValidPhoneNumber": "გთხოვთ შეიყვანეთ ვალიდური ნომერი",
+  "FirstEnterValidPhoneNumber": "ჯერ შეიყვანეთ ვალიდური ტელეფონის ნომერი",
+  "enterCardNumber": "გთხოვთ შეიყვანეთ ბარათის ნომერი",
+  "enterValidCardNumber": "გთხოვთ შეიყვანეთ ვალიდური ბარათის ნომერი",
+  "selectCity": "გთხოვთ აირჩიოთ ქალაქი",
+  "selectCountry": "გთხოვთ აირჩიოთ ქვეყანა",
+  "PleaseEnterAddress": "გთხოვთ შეიყვანეთ თქვენი მისამართი",
+  "PleaseEnterFirstName": "გთხოვთ შეიყვანეთ თქვენი სახელი",
+  "PleaseEnterLastName": "გთხოვთ შეიყვანეთ თქვენი გვარი",
+  "pleaseEnterValidEmail": "გთხოვთ შეიყვანეთვალიდური იმეილი"
 }

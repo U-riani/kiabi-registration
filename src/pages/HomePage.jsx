@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import LanguageButton from "../components/LanguageButton";
 import { regions } from "../data/regions";
 import { countries } from "../data/countries";
-import { phonePrefixes } from "../data/phoneNumberPrefixes";
 import { getCountryName, getCountryOptions } from "../utils/countryHelpers";
 import PhonePrefixSelect from "../components/PhonePrefixSelect";
 
@@ -16,7 +15,7 @@ const getDaysInMonth = (month, year) => {
   return new Date(year, month, 0).getDate();
 };
 
-export const MONTHS = {
+const MONTHS = {
   en: [
     { value: 1, label: "January" },
     { value: 2, label: "February" },
@@ -65,8 +64,8 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - i);
 
 const HomePage = () => {
-  const baseURL = "https://kiabi-loyalty-server.onrender.com";
-  // const baseURL = "http://localhost:5000";
+  // const baseURL = "https://kiabi-loyalty-server.onrender.com";
+  const baseURL = "http://localhost:5000";
 
   const CARD_MASK = "XXX XXX XXX XXX XX";
   const CARD_MAX_DIGITS = 14;
@@ -168,8 +167,6 @@ const HomePage = () => {
     );
   }, []);
 
-  console.log(fieldsData.branch);
-
   useEffect(() => {
     setFieldsData((prev) => ({
       ...prev,
@@ -188,9 +185,13 @@ const HomePage = () => {
     return () => clearInterval(timer);
   }, [cooldown]);
 
+
+
   const isValidPhoneLength = (raw) => {
     const cleaned = raw.replace(/[^0-9]/g, "");
-    return cleaned.length >= 6 && cleaned.length <= 15;
+    if (fieldsData.prefix && fieldsData.prefix === "+995")
+      return cleaned.length === 9;
+    else return cleaned.length >= 6 && cleaned.length <= 15;
   };
 
   const isValidEmail = (email) => {
@@ -263,7 +264,6 @@ const HomePage = () => {
     setCooldown(0);
     setInfoMessage("");
   };
-
   // ------------------- SEND OTP -------------------
   const handleGetCode = async (e) => {
     e.preventDefault();
@@ -279,8 +279,17 @@ const HomePage = () => {
       if (!raw) {
         setErrors((prev) => ({
           ...prev,
-          phoneNumber: "Please enter phone number",
-          verificationCode: "First enter valid phone number",
+          phoneNumber: t("pleaseEnterPhoneNumber"),
+          verificationCode: t("FirstEnterValidPhoneNumber"),
+        }));
+        return;
+      }
+
+      if (fieldsData.prefix === "995" && raw.length < 8) {
+        setErrors((prev) => ({
+          ...prev,
+          phoneNumber: t("pleaseEnterValidPhoneNumber"),
+          verificationCode: t("FirstEnterValidPhoneNumber"),
         }));
         return;
       }
@@ -303,8 +312,8 @@ const HomePage = () => {
       if (!isValidPhoneLength(raw)) {
         setErrors((prev) => ({
           ...prev,
-          phoneNumber: "Enter a valid phone number",
-          verificationCode: "First enter valid phone number",
+          phoneNumber: t("EnterValidPhoneNumber"),
+          verificationCode: t("FirstEnterValidPhoneNumber"),
         }));
         return;
       }
@@ -319,7 +328,7 @@ const HomePage = () => {
       // const formattedPhone = fieldsData.phoneNumber.startsWith("995")
       //   ? fieldsData.phoneNumber
       //   : `995${fieldsData.phoneNumber.replace(/^0/, "")}`;
-      console.log(formattedPhone);
+      // console.log(formattedPhone);
       const res = await fetch(`${baseURL}/api/sms/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -425,6 +434,7 @@ const HomePage = () => {
     // Manual validation
     const newErrors = {};
 
+    
     // birthdate validation
     const { birthDay, birthMonth, birthYear } = fieldsData;
     if (!birthDay || !birthMonth || !birthYear) {
@@ -433,31 +443,37 @@ const HomePage = () => {
       newErrors.dateOfBirth = t("YouMustBeAtLeast14");
     }
     if (!fieldsData.gender) newErrors.gender = "select gender";
-    if (!fieldsData.firstName.trim()) newErrors.firstName = "enter first name";
-    if (!fieldsData.lastName.trim()) newErrors.lastName = "enter last name";
-    if (!fieldsData.address.trim()) newErrors.address = "enter address";
+    if (!fieldsData.firstName.trim())
+      newErrors.firstName = t("PleaseEnterFirstName");
+    if (!fieldsData.lastName.trim())
+      newErrors.lastName = t("PleaseEnterLastName");
+    if (!fieldsData.address.trim()) newErrors.address = t("PleaseEnterAddress");
     if (fieldsData.city === null || fieldsData.city === undefined)
-      newErrors.city = "select city";
+      newErrors.city = t("selectCity");
     if (fieldsData.country === null || fieldsData.country === undefined)
-      newErrors.country = "select country";
-    if (!fieldsData.cardNumber.trim())
-      newErrors.cardNumber = "enter card number";
+      newErrors.country = t("selectCountry");
+    if (!fieldsData.cardNumber) {
+      newErrors.cardNumber = t("enterCardNumber");
+    } else if (fieldsData.cardNumber.length !== CARD_MAX_DIGITS) {
+      newErrors.cardNumber = t("enterValidCardNumber");
+    }
 
     /// PHONE NUMBER VALIDATION
     if (!fieldsData.phoneNumber.trim()) {
-      newErrors.phoneNumber = "Please enter phone number";
+      newErrors.phoneNumber = t("pleaseENterPhoneNumber");
     } else if (!isValidPhoneLength(fieldsData.phoneNumber)) {
-      newErrors.phoneNumber = "Enter a valid phone number";
+      newErrors.phoneNumber = t("EnterValidPhoneNumber");
     }
 
     // VERIFICATION CHECK
     if (!isVerified) {
-      newErrors.verificationCode = "verify phone";
+      newErrors.verificationCode = t("verifyPhone");
     }
-    if (!fieldsData.termsAccepted) newErrors.termsAccepted = "accept terms";
+    if (!fieldsData.termsAccepted)
+      newErrors.termsAccepted = t("termsAndConditionError");
 
     if (fieldsData.email && !isValidEmail(fieldsData.email.trim())) {
-      newErrors.email = "Enter a valid email";
+      newErrors.email = t("pleaseEnterValidEmail");
     }
 
     setErrors(newErrors);
@@ -517,7 +533,6 @@ const HomePage = () => {
           branch: fieldsData.branch,
         }),
       });
-      console.log(fieldsData.termsAccepted);
 
       const resData = await req.json();
 
@@ -800,6 +815,7 @@ const HomePage = () => {
             </div>
             <div>
               <form
+                autoComplete="off"
                 className="flex flex-col gap-4 bg-[#fff] font-Roboto w-full max-w-[800px] p-5 sm:p-7 xl:p-10 shadow-xl border border-neutral-200 rounded "
                 onSubmit={handleSubmit}
                 onKeyDown={(e) => {
@@ -874,15 +890,17 @@ const HomePage = () => {
                       {t("firstName")} *
                     </label>
                     {errors.firstName && (
-                      <p className="text-red-600 text-sm">
-                        Please enter your first name
-                      </p>
+                      <p className="text-red-600 text-sm">{errors.firstName}</p>
                     )}
 
                     <input
                       id="firstName"
                       name="firstName"
                       type="text"
+                      autoComplete="new-password"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck={false}
                       className="border px-2 py-1 rounded border-gray-400"
                       value={fieldsData.firstName}
                       onChange={handleChange}
@@ -899,15 +917,17 @@ const HomePage = () => {
                       {t("lastName")} *
                     </label>
                     {errors.lastName && (
-                      <p className="text-red-600 text-sm">
-                        Please enter your last name
-                      </p>
+                      <p className="text-red-600 text-sm">{errors.lastName}</p>
                     )}
 
                     <input
                       id="lastName"
                       name="lastName"
                       type="text"
+                      autoComplete="new-password"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck={false}
                       className="border px-2 py-1 rounded border-gray-400"
                       value={fieldsData.lastName}
                       onChange={handleChange}
@@ -1012,15 +1032,17 @@ const HomePage = () => {
                     {t("address")} *
                   </label>
                   {errors.address && (
-                    <p className="text-red-600 text-sm">
-                      Please enter your address
-                    </p>
+                    <p className="text-red-600 text-sm">{errors.address}</p>
                   )}
 
                   <input
                     id="address"
                     name="address"
                     type="text"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                     className="border px-2 py-1 rounded flex-1 border-gray-400"
                     value={fieldsData.address}
                     onChange={handleChange}
@@ -1035,7 +1057,7 @@ const HomePage = () => {
                       {t("city")} *
                     </label>
                     {errors.city && (
-                      <p className="text-red-600 text-sm">Please select city</p>
+                      <p className="text-red-600 text-sm">{errors.city}</p>
                     )}
 
                     {/* <input
@@ -1067,9 +1089,7 @@ const HomePage = () => {
                     {t("country")} *
                   </label>
                   {errors.country && (
-                    <p className="text-red-600 text-sm">
-                      Please select country
-                    </p>
+                    <p className="text-red-600 text-sm">{errors.country}</p>
                   )}
 
                   <ReusableSearchSelect
@@ -1097,9 +1117,7 @@ const HomePage = () => {
                     {t("cardNumber")} *
                   </label>
                   {errors.cardNumber && (
-                    <p className="text-red-600 text-sm">
-                      Please enter your Card number
-                    </p>
+                    <p className="text-red-600 text-sm">{errors.cardNumber}</p>
                   )}
 
                   <input
@@ -1108,8 +1126,9 @@ const HomePage = () => {
                     name="cardNumber"
                     type="text"
                     inputMode="numeric"
-                    autoComplete="off"
+                    autoComplete="new-password"
                     spellCheck={false}
+                    readOnly
                     className="border px-2 py-1 rounded flex-1 border-gray-400"
                     value={maskNumber(fieldsData.cardNumber, CARD_MASK)}
                     onKeyDown={(e) => {
@@ -1121,6 +1140,7 @@ const HomePage = () => {
                         "Delete",
                       ];
 
+                      errors.cardNumber = false;
                       // BACKSPACE
                       if (e.key === "Backspace") {
                         e.preventDefault();
@@ -1175,6 +1195,10 @@ const HomePage = () => {
                     id="email"
                     name="email"
                     type="email"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                     className="border px-2 py-1 rounded flex-1 border-gray-400"
                     value={fieldsData.email}
                     onChange={handleChange}
@@ -1209,8 +1233,11 @@ const HomePage = () => {
                       name="phoneNumber"
                       type="text"
                       inputMode="numeric"
-                      autoComplete="off"
+                      autoComplete="new-password"
+                      autoCorrect="off"
+                      autoCapitalize="off"
                       spellCheck={false}
+                      readOnly
                       className="border px-2 py-1 rounded flex-1 border-gray-400"
                       value={maskNumber(fieldsData.phoneNumber, mask)}
                       onKeyDown={(e) => {
@@ -1222,6 +1249,8 @@ const HomePage = () => {
                           "Delete",
                         ];
 
+                        errors.phoneNumber = false;
+                        errors.verificationCode = false;
                         // BACKSPACE (single source of truth)
                         if (e.key === "Backspace") {
                           e.preventDefault();
@@ -1486,7 +1515,9 @@ const HomePage = () => {
                 </div> */}
                 <div className="flex flex-col gap-2">
                   {errors.termsAccepted && (
-                    <p className="text-red-600 text-sm">Please mark agree</p>
+                    <p className="text-red-600 text-sm">
+                      {errors.termsAccepted}
+                    </p>
                   )}
                   <div className="flex flex-row items-center gap-2">
                     <input
